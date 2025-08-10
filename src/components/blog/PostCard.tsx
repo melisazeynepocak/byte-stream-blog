@@ -11,6 +11,7 @@ export const PostCard = ({ post }: { post: Post }) => {
           src={post.cover}
           alt={`${post.title} görseli`}
           loading="lazy"
+          decoding="async"
           className="w-full h-44 object-cover rounded-t-lg"
         />
       </Link>

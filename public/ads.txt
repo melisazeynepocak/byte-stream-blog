@@ -1,0 +1,4 @@
+# ads.txt – düzenlenebilir örnek içerik
+# Reklam sağlayıcılarınızı buraya ekleyin (satır başına bir kayıt).
+# Örnek format:
+# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0

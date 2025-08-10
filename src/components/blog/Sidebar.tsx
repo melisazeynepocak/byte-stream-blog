@@ -32,7 +32,7 @@ export const Sidebar = () => {
         <h3 className="font-bold text-lg mb-3">Etiket Bulutu</h3>
         <div className="flex flex-wrap gap-2">
           {tags.map((t) => (
-            <Link key={t.tag} to={`/?q=${encodeURIComponent(t.tag)}`} className="text-sm px-2 py-1 rounded bg-accent hover:bg-accent/80">
+            <Link key={t.tag} to={`/etiket/${encodeURIComponent(t.tag)}`} className="text-sm px-2 py-1 rounded bg-accent hover:bg-accent/80">
               #{t.tag}
             </Link>
           ))}
