@@ -1,5 +1,6 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { Seo } from "@/components/Seo";
 
 const NotFound = () => {
   const location = useLocation();
@@ -12,15 +13,16 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-muted-foreground mb-4">Oops! Sayfa bulunamadı</p>
-        <a href="/" className="text-primary underline">
-          Anasayfaya dön
-        </a>
-      </div>
-    </div>
+    <>
+      <Seo title="Sayfa Bulunamadı – TeknoBlog" description="Aradığınız sayfa mevcut değil." />
+      <main className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center p-8">
+          <h1 className="text-6xl font-extrabold tracking-tight">404</h1>
+          <p className="text-base md:text-lg text-muted-foreground mt-2">Oops! Sayfa bulunamadı</p>
+          <a href="/" className="inline-block mt-4 px-4 py-2 rounded bg-primary text-primary-foreground">Anasayfaya dön</a>
+        </div>
+      </main>
+    </>
   );
 };
 

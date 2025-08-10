@@ -13,6 +13,9 @@ const CategoryPage = () => {
     <>
       <Seo title={title} description={`${categoryName(categorySlug as CategorySlug)} kategorisindeki yazılar.`} />
       <main className="container py-8">
+        <nav aria-label="breadcrumb" className="mb-4 text-sm text-muted-foreground">
+          <a href="/" className="hover:underline">Anasayfa</a> / <span>{categoryName(categorySlug as CategorySlug)}</span>
+        </nav>
         <h1 className="text-2xl font-bold mb-6">{categoryName(categorySlug as CategorySlug)}</h1>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <section className="lg:col-span-8">

@@ -8,7 +8,7 @@ interface SeoProps {
   publishedTime?: string;
   modifiedTime?: string;
   canonical?: string;
-  schema?: object;
+  schema?: object | object[];
 }
 
 export const Seo = ({
@@ -43,7 +43,16 @@ export const Seo = ({
     ensure("og:title", 'meta[property="og:title"]')!.setAttribute("content", title);
     ensure("og:description", 'meta[property="og:description"]')!.setAttribute("content", description);
     ensure("og:type", 'meta[property="og:type"]')!.setAttribute("content", type);
+    ensure("og:url", 'meta[property="og:url"]')!.setAttribute("content", canonical || window.location.href);
     if (image) ensure("og:image", 'meta[property="og:image"]')!.setAttribute("content", image);
+
+    // Twitter Cards
+    ensure("twitter:card", 'meta[name="twitter:card"]')!.setAttribute("content", image ? "summary_large_image" : "summary");
+    ensure("twitter:title", 'meta[name="twitter:title"]')!.setAttribute("content", title);
+    ensure("twitter:description", 'meta[name="twitter:description"]')!.setAttribute("content", description);
+    if (image) ensure("twitter:image", 'meta[name="twitter:image"]')!.setAttribute("content", image);
+    const twitterSite = localStorage.getItem("seo.twitterSite");
+    if (twitterSite) ensure("twitter:site", 'meta[name="twitter:site"]')!.setAttribute("content", twitterSite);
 
     if (type === "article") {
       if (publishedTime) ensure("article:published_time", 'meta[property="article:published_time"]')!.setAttribute("content", publishedTime);
@@ -58,6 +67,12 @@ export const Seo = ({
       doc.head.appendChild(link);
     }
     link.href = canonical || window.location.href;
+
+    // Google Search Console verification
+    const gsc = localStorage.getItem("seo.gscVerification");
+    if (gsc) {
+      ensure("google-site-verification", 'meta[name="google-site-verification"]')!.setAttribute("content", gsc);
+    }
 
     // JSON-LD
     const scriptId = "seo-jsonld";

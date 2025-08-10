@@ -10,6 +10,14 @@ import SiteFooter from "@/components/layout/SiteFooter";
 import CategoryPage from "@/pages/Category";
 import PostPage from "@/pages/Post";
 import AdminPage from "@/pages/Admin";
+import About from "@/pages/About";
+import Contact from "@/pages/Contact";
+import Privacy from "@/pages/Privacy";
+import Cookies from "@/pages/Cookies";
+import EditorialPolicy from "@/pages/EditorialPolicy";
+import AdsDisclosure from "@/pages/AdsDisclosure";
+import TagPage from "@/pages/Tag";
+import { CookieBanner } from "@/components/CookieBanner";
 
 const queryClient = new QueryClient();
 
@@ -23,12 +31,20 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/hakkimizda" element={<About />} />
+          <Route path="/iletisim" element={<Contact />} />
+          <Route path="/gizlilik-politikasi" element={<Privacy />} />
+          <Route path="/cerez-politikasi" element={<Cookies />} />
+          <Route path="/editorial-politika" element={<EditorialPolicy />} />
+          <Route path="/reklam-affiliate" element={<AdsDisclosure />} />
+          <Route path="/etiket/:tag" element={<TagPage />} />
           <Route path="/kategori/:categorySlug" element={<CategoryPage />} />
           <Route path="/:categorySlug/:postSlug" element={<PostPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
         <SiteFooter />
+        <CookieBanner />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

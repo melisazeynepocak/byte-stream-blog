@@ -2,10 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Seo } from "@/components/Seo";
 import AdSlot from "@/components/AdSlot";
-import { addComment, getComments, getPostBySlugs, incrementViews } from "@/lib/blogData";
+import { addComment, getComments, getPostBySlugs, incrementViews, getPosts } from "@/lib/blogData";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { generateOgImageDataUrl } from "@/lib/og";
 
 const Share = ({ url, title }: { url: string; title: string }) => {
   const text = encodeURIComponent(title);
@@ -45,6 +46,11 @@ const PostPage = () => {
   }
 
   const url = `${window.location.origin}/${post.category.slug}/${post.slug}`;
+  const related = useMemo(() =>
+    getPosts().filter((p) => p.id !== post.id && p.tags.some((t) => post.tags.includes(t))).slice(0, 4)
+  , [post.id]);
+
+  const ogImage = post.cover || generateOgImageDataUrl(post.title, "TeknoBlog");
 
   return (
     <>
@@ -52,24 +58,41 @@ const PostPage = () => {
         title={`${post.title} – TeknoBlog`}
         description={post.subtitle}
         type="article"
-        image={post.cover}
+        image={ogImage}
         publishedTime={post.createdAt}
-        schema={{
-          "@context": "https://schema.org",
-          "@type": "Article",
-          headline: post.title,
-          description: post.subtitle,
-          datePublished: post.createdAt,
-          image: post.cover,
-          author: { "@type": "Organization", name: "TeknoBlog" },
-          mainEntityOfPage: url,
-        }}
+        schema={[
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Anasayfa", item: window.location.origin },
+              { "@type": "ListItem", position: 2, name: post.category.name, item: `${window.location.origin}/kategori/${post.category.slug}` },
+              { "@type": "ListItem", position: 3, name: post.title, item: url },
+            ],
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "TechArticle",
+            headline: post.title,
+            description: post.subtitle,
+            datePublished: post.createdAt,
+            image: ogImage,
+            author: { "@type": "Organization", name: "TeknoBlog" },
+            mainEntityOfPage: url,
+          },
+        ]}
       />
 
       <main className="container py-6 md:py-10">
         <AdSlot slot="top" className="mb-6" />
 
         <article className="max-w-3xl">
+          <nav aria-label="breadcrumb" className="mb-3 text-xs text-muted-foreground">
+            <Link to="/" className="hover:underline">Anasayfa</Link> / {" "}
+            <Link to={`/kategori/${post.category.slug}`} className="hover:underline">{post.category.name}</Link> / {" "}
+            <span>{post.title}</span>
+          </nav>
+
           <header className="mb-6">
             <Link to={`/kategori/${post.category.slug}`} className="text-sm text-primary">
               {post.category.name}
@@ -82,11 +105,11 @@ const PostPage = () => {
               ))}
             </div>
             <div className="mt-2 text-xs text-muted-foreground">
-              Yayınlanma: {new Date(post.createdAt).toLocaleDateString("tr-TR")}
+              Yayınlanma: {new Date(post.createdAt).toLocaleDateString("tr-TR")} · Güncellendi: {new Date(post.createdAt).toLocaleDateString("tr-TR")}
             </div>
           </header>
 
-          <img src={post.cover} alt="Kapak görseli" className="w-full rounded-lg" />
+          <img src={ogImage} alt="Kapak görseli" className="w-full rounded-lg" loading="lazy" decoding="async" />
 
           <AdSlot slot="inArticle" className="my-6" />
 
@@ -94,10 +117,31 @@ const PostPage = () => {
             <p>{post.content}</p>
           </section>
 
+          <AdSlot slot="inArticle" className="my-6" />
+
+          <aside className="mt-8 p-4 rounded-lg border bg-card">
+            <h4 className="font-semibold">İçindekiler</h4>
+            <p className="text-sm text-muted-foreground mt-1">Bu yazıdaki başlıkların hızlı özeti (otomatik).</p>
+          </aside>
+
           <div className="mt-8">
             <h3 className="font-semibold mb-2">Paylaş</h3>
             <Share url={url} title={post.title} />
           </div>
+
+          <section className="mt-10">
+            <h3 className="font-semibold text-lg mb-3">İlgili Yazılar</h3>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {related.map((p) => (
+                <Link key={p.id} to={`/${p.category.slug}/${p.slug}`} className="group">
+                  <img src={p.cover} alt="" className="w-full h-28 object-cover rounded" loading="lazy" decoding="async" />
+                  <div className="mt-2 text-sm font-medium group-hover:underline leading-snug">{p.title}</div>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          <AdSlot slot="inArticle" className="my-6" />
 
           <section className="mt-10">
             <h3 className="font-semibold text-lg mb-3">Yorumlar</h3>
@@ -128,6 +172,11 @@ const PostPage = () => {
                 </li>
               ))}
             </ul>
+          </section>
+
+          <section className="mt-10">
+            <h3 className="font-semibold mb-2">Kaynakça</h3>
+            <p className="text-sm text-muted-foreground">—</p>
           </section>
         </article>
       </main>

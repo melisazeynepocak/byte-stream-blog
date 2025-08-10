@@ -1,11 +1,13 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CATEGORIES } from "@/lib/blogData";
 import { Input } from "@/components/ui/input";
+import { ThemeToggle } from "./ThemeToggle";
 
 export const SiteHeader = () => {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
+  const debounceRef = useRef<number | null>(null);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,13 +35,21 @@ export const SiteHeader = () => {
           ))}
         </nav>
 
-        <form onSubmit={onSubmit} className="w-48 md:w-64">
+        <form onSubmit={onSubmit} className="w-48 md:w-64 flex items-center gap-2">
           <Input
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setQ(val);
+              if (debounceRef.current) window.clearTimeout(debounceRef.current);
+              debounceRef.current = window.setTimeout(() => {
+                navigate(val ? `/?q=${encodeURIComponent(val)}` : "/");
+              }, 350);
+            }}
             placeholder="Ara..."
             aria-label="Site içi arama"
           />
+          <ThemeToggle />
         </form>
       </div>
     </header>
