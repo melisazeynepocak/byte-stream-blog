@@ -2,7 +2,7 @@ export const SiteFooter = () => {
   return (
     <footer className="border-t mt-16">
       <div className="container py-8 text-sm text-muted-foreground flex flex-col md:flex-row items-center justify-between gap-4">
-        <p>&copy; {new Date().getFullYear()} TeknoBlog. Tüm hakları saklıdır.</p>
+        <p>&copy; {new Date().getFullYear()} TeknoBlogoji. Tüm hakları saklıdır.</p>
         <nav className="flex flex-wrap gap-4">
           <a href="/hakkimizda" className="hover:underline">Hakkımızda</a>
           <a href="/iletisim" className="hover:underline">İletişim</a>
