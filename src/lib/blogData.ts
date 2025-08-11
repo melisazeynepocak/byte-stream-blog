@@ -196,6 +196,22 @@ export function getAllTags(): { tag: string; count: number }[] {
   return [...map.entries()].map(([tag, count]) => ({ tag, count })).sort((a, b) => b.count - a.count);
 }
 
+export function getCategoryTags(categorySlug: CategorySlug): { tag: string; count: number }[] {
+  const categoryPosts = getByCategory(categorySlug);
+  const map = new Map<string, number>();
+  categoryPosts.forEach((p) => p.tags.forEach((t) => map.set(t, (map.get(t) || 0) + 1)));
+  return [...map.entries()].map(([tag, count]) => ({ tag, count })).sort((a, b) => b.count - a.count);
+}
+
+export function getPostsByTags(tags: string[], categorySlug?: CategorySlug): Post[] {
+  if (tags.length === 0) return categorySlug ? getByCategory(categorySlug) : getPosts();
+  
+  const posts = categorySlug ? getByCategory(categorySlug) : getPosts();
+  return posts.filter(post => 
+    tags.some(tag => post.tags.includes(tag))
+  );
+}
+
 export function getComments(postId: string) {
   return COMMENTS.filter((c) => c.postId === postId).sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
 }
