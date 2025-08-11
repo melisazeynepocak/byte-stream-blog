@@ -10,7 +10,7 @@ export const HeroPostCard = ({ post }: { post: Post }) => {
           src={post.cover}
           alt={`${post.title} kapak görseli`}
           loading="eager"
-          fetchpriority="high"
+          fetchPriority="high"
           decoding="async"
           className="w-full h-[280px] md:h-[420px] object-cover group-hover:scale-[1.02] transition-transform"
         />
