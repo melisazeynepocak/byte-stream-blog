@@ -19,7 +19,7 @@ export const PostCard = ({ post }: { post: Post }) => {
         <Link to={`/kategori/${post.category.slug}`} className="text-xs text-primary">
           {post.category.name}
         </Link>
-        <Link to={to} className="block mt-1 font-semibold text-lg leading-snug hover:underline">
+        <Link to={to} className="block mt-1 font-semibold text-lg leading-snug hover:underline line-clamp-2">
           {post.title}
         </Link>
         <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{post.subtitle}</p>
