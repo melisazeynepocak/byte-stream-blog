@@ -18,7 +18,7 @@ export const SiteHeader = () => {
     <header className="sticky top-0 z-40 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
       <div className="container flex items-center justify-between h-16 gap-4">
         <NavLink to="/" className="font-extrabold text-lg tracking-tight">
-          <span className="text-primary">Tekno</span>Blog
+          <span className="text-primary">Tekno</span>Blogoji
         </NavLink>
 
         <nav className="hidden md:flex items-center gap-4">
