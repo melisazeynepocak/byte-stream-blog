@@ -7,19 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { generateOgImageDataUrl } from "@/lib/og";
-
-const Share = ({ url, title }: { url: string; title: string }) => {
-  const text = encodeURIComponent(title);
-  const u = encodeURIComponent(url);
-  return (
-    <div className="flex flex-wrap gap-2 text-sm">
-      <a className="px-3 py-1 rounded bg-accent hover:bg-accent/80" href={`https://www.facebook.com/sharer/sharer.php?u=${u}`} target="_blank" rel="noreferrer">Facebook</a>
-      <a className="px-3 py-1 rounded bg-accent hover:bg-accent/80" href={`https://twitter.com/intent/tweet?url=${u}&text=${text}`} target="_blank" rel="noreferrer">Twitter/X</a>
-      <a className="px-3 py-1 rounded bg-accent hover:bg-accent/80" href={`https://www.linkedin.com/sharing/share-offsite/?url=${u}`} target="_blank" rel="noreferrer">LinkedIn</a>
-      <a className="px-3 py-1 rounded bg-accent hover:bg-accent/80" href={`https://api.whatsapp.com/send?text=${text}%20${u}`} target="_blank" rel="noreferrer">WhatsApp</a>
-    </div>
-  );
-};
+import { ReadingProgress } from "@/components/blog/ReadingProgress";
+import { PostMeta } from "@/components/blog/PostMeta";
+import { TableOfContents } from "@/components/blog/TableOfContents";
+import { ShareButtons } from "@/components/blog/ShareButtons";
+import { SimilarPosts } from "@/components/blog/SimilarPosts";
 
 const PostPage = () => {
   const { categorySlug, postSlug } = useParams();
@@ -47,13 +39,17 @@ const PostPage = () => {
 
   const url = `${window.location.origin}/${post.category.slug}/${post.slug}`;
   const related = useMemo(() =>
-    getPosts().filter((p) => p.id !== post.id && p.tags.some((t) => post.tags.includes(t))).slice(0, 4)
+    getPosts().filter((p) => p.id !== post.id && p.tags.some((t) => post.tags.includes(t)))
   , [post.id]);
 
   const ogImage = post.cover || generateOgImageDataUrl(post.title, "TeknoBlog");
+  
+  // Calculate reading time (rough estimate: 200 words per minute)
+  const readingTime = Math.ceil(post.content.split(' ').length / 200);
 
   return (
     <>
+      <ReadingProgress />
       <Seo
         title={`${post.title} – TeknoBlog`}
         description={post.subtitle}
@@ -83,102 +79,123 @@ const PostPage = () => {
         ]}
       />
 
-      <main className="container py-6 md:py-10">
+      <main className="container py-6 md:py-10 relative">
         <AdSlot slot="top" className="mb-6" />
 
-        <article className="max-w-3xl">
-          <nav aria-label="breadcrumb" className="mb-3 text-xs text-muted-foreground">
-            <Link to="/" className="hover:underline">Anasayfa</Link> / {" "}
-            <Link to={`/kategori/${post.category.slug}`} className="hover:underline">{post.category.name}</Link> / {" "}
-            <span>{post.title}</span>
-          </nav>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <article className="lg:col-span-8 max-w-3xl">
+            <nav aria-label="breadcrumb" className="mb-3 text-xs text-muted-foreground">
+              <Link to="/" className="hover:underline">Anasayfa</Link> / {" "}
+              <Link to={`/kategori/${post.category.slug}`} className="hover:underline">{post.category.name}</Link> / {" "}
+              <span>{post.title}</span>
+            </nav>
 
-          <header className="mb-6">
-            <Link to={`/kategori/${post.category.slug}`} className="text-sm text-primary">
-              {post.category.name}
-            </Link>
-            <h1 className="text-3xl md:text-4xl font-extrabold mt-2">{post.title}</h1>
-            <p className="mt-2 text-muted-foreground">{post.subtitle}</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {post.tags.map((t) => (
-                <Badge key={t} variant="secondary">#{t}</Badge>
-              ))}
+            <header className="mb-6">
+              <Link to={`/kategori/${post.category.slug}`} className="text-sm text-primary">
+                {post.category.name}
+              </Link>
+              <h1 className="text-3xl md:text-4xl font-extrabold mt-2">{post.title}</h1>
+              <p className="mt-2 text-lg text-muted-foreground">{post.subtitle}</p>
+              
+              <PostMeta 
+                author="TeknoBlog Editörü" 
+                publishedAt={post.createdAt}
+                readingTime={readingTime}
+              />
+              
+              <div className="mt-4 flex flex-wrap gap-2">
+                {post.tags.map((t) => (
+                  <Badge key={t} variant="secondary">#{t}</Badge>
+                ))}
+              </div>
+            </header>
+
+            <img src={ogImage} alt="Kapak görseli" className="w-full rounded-lg mb-6" loading="eager" fetchPriority="high" decoding="async" />
+
+            <TableOfContents content={post.content} />
+
+            <section className="prose prose-neutral max-w-none dark:prose-invert">
+              <div id="giris">
+                <h2>Giriş</h2>
+                <p>{post.content}</p>
+              </div>
+              
+              <AdSlot slot="inArticle" className="my-8" />
+              
+              <div id="ozellikler">
+                <h2>Temel Özellikler</h2>
+                <p>Bu bölümde ürünün temel özelliklerini inceleyeceğiz...</p>
+                
+                <h3 id="performans">Performans Analizi</h3>
+                <p>Performans testlerinde dikkat çeken sonuçlar...</p>
+                
+                <h3 id="kamera">Kamera Kalitesi</h3>
+                <p>Kamera performansı ve görüntü kalitesi...</p>
+              </div>
+              
+              <AdSlot slot="inArticle" className="my-8" />
+              
+              <div id="sonuc">
+                <h2>Sonuç ve Değerlendirme</h2>
+                <p>Genel değerlendirme ve öneriler...</p>
+              </div>
+            </section>
+
+            <SimilarPosts posts={related} currentPostId={post.id} />
+
+            <section id="comments" className="mt-12 border-t pt-8">
+              <h3 className="font-semibold text-lg mb-3">Yorumlar</h3>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!name.trim() || !message.trim()) return;
+                  addComment(post.id, name.trim(), message.trim());
+                  setComments(getComments(post.id));
+                  setName("");
+                  setMessage("");
+                }}
+                className="space-y-3"
+              >
+                <Input placeholder="Adınız" value={name} onChange={(e) => setName(e.target.value)} />
+                <Textarea placeholder="Yorumunuz" value={message} onChange={(e) => setMessage(e.target.value)} />
+                <button type="submit" className="px-4 py-2 rounded bg-primary text-primary-foreground">Gönder</button>
+              </form>
+
+              <ul className="mt-6 space-y-4">
+                {comments.map((c) => (
+                  <li key={c.id} className="border rounded p-3">
+                    <div className="text-sm font-medium">{c.name}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {new Date(c.createdAt).toLocaleString("tr-TR")}
+                    </div>
+                    <p className="mt-2 text-sm">{c.message}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            <section className="mt-10">
+              <h3 className="font-semibold mb-2">Kaynakça</h3>
+              <p className="text-sm text-muted-foreground">—</p>
+            </section>
+          </article>
+
+          {/* Sidebar with Share Buttons */}
+          <aside className="lg:col-span-4">
+            <div className="sticky top-24">
+              <ShareButtons 
+                url={url} 
+                title={post.title} 
+                className="hidden lg:block mb-6" 
+              />
             </div>
-            <div className="mt-2 text-xs text-muted-foreground">
-              Yayınlanma: {new Date(post.createdAt).toLocaleDateString("tr-TR")} · Güncellendi: {new Date(post.createdAt).toLocaleDateString("tr-TR")}
-            </div>
-          </header>
-
-          <img src={ogImage} alt="Kapak görseli" className="w-full rounded-lg" loading="lazy" decoding="async" />
-
-          <AdSlot slot="inArticle" className="my-6" />
-
-          <section className="prose prose-neutral max-w-none dark:prose-invert">
-            <p>{post.content}</p>
-          </section>
-
-          <AdSlot slot="inArticle" className="my-6" />
-
-          <aside className="mt-8 p-4 rounded-lg border bg-card">
-            <h4 className="font-semibold">İçindekiler</h4>
-            <p className="text-sm text-muted-foreground mt-1">Bu yazıdaki başlıkların hızlı özeti (otomatik).</p>
           </aside>
+        </div>
 
-          <div className="mt-8">
-            <h3 className="font-semibold mb-2">Paylaş</h3>
-            <Share url={url} title={post.title} />
-          </div>
-
-          <section className="mt-10">
-            <h3 className="font-semibold text-lg mb-3">İlgili Yazılar</h3>
-            <div className="grid sm:grid-cols-2 gap-4">
-              {related.map((p) => (
-                <Link key={p.id} to={`/${p.category.slug}/${p.slug}`} className="group">
-                  <img src={p.cover} alt="" className="w-full h-28 object-cover rounded" loading="lazy" decoding="async" />
-                  <div className="mt-2 text-sm font-medium group-hover:underline leading-snug">{p.title}</div>
-                </Link>
-              ))}
-            </div>
-          </section>
-
-          <AdSlot slot="inArticle" className="my-6" />
-
-          <section className="mt-10">
-            <h3 className="font-semibold text-lg mb-3">Yorumlar</h3>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (!name.trim() || !message.trim()) return;
-                addComment(post.id, name.trim(), message.trim());
-                setComments(getComments(post.id));
-                setName("");
-                setMessage("");
-              }}
-              className="space-y-3"
-            >
-              <Input placeholder="Adınız" value={name} onChange={(e) => setName(e.target.value)} />
-              <Textarea placeholder="Yorumunuz" value={message} onChange={(e) => setMessage(e.target.value)} />
-              <button type="submit" className="px-4 py-2 rounded bg-primary text-primary-foreground">Gönder</button>
-            </form>
-
-            <ul className="mt-6 space-y-4">
-              {comments.map((c) => (
-                <li key={c.id} className="border rounded p-3">
-                  <div className="text-sm font-medium">{c.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {new Date(c.createdAt).toLocaleString("tr-TR")}
-                  </div>
-                  <p className="mt-2 text-sm">{c.message}</p>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          <section className="mt-10">
-            <h3 className="font-semibold mb-2">Kaynakça</h3>
-            <p className="text-sm text-muted-foreground">—</p>
-          </section>
-        </article>
+        {/* Mobile Share Buttons */}
+        <div className="lg:hidden fixed bottom-4 left-4 z-40">
+          <ShareButtons url={url} title={post.title} />
+        </div>
       </main>
     </>
   );
