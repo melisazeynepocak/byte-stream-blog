@@ -10,7 +10,7 @@ export const Sidebar = () => {
       <AdSlot slot="sidebar" />
 
       <section>
-        <h3 className="font-bold text-lg mb-3">En Çok Okunanlar</h3>
+        <h3 className="font-bold text-lg mb-3">En Çok Okunanlarr</h3>
         <ul className="space-y-3">
           {most.map((p) => (
             <li key={p.id} className="flex gap-3">
