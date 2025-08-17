@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import SiteHeader from "@/components/layout/SiteHeader";
@@ -10,6 +11,9 @@ import SiteFooter from "@/components/layout/SiteFooter";
 import CategoryPage from "@/pages/Category";
 import PostPage from "@/pages/Post";
 import AdminPage from "@/pages/Admin";
+import Auth from "@/pages/Auth";
+import AdminDashboard from "@/pages/AdminDashboard";
+import AdminPostEditor from "@/pages/AdminPostEditor";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
 import Privacy from "@/pages/Privacy";
@@ -23,30 +27,36 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <SiteHeader />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/hakkimizda" element={<About />} />
-          <Route path="/iletisim" element={<Contact />} />
-          <Route path="/gizlilik-politikasi" element={<Privacy />} />
-          <Route path="/cerez-politikasi" element={<Cookies />} />
-          <Route path="/editorial-politika" element={<EditorialPolicy />} />
-          <Route path="/reklam-affiliate" element={<AdsDisclosure />} />
-          <Route path="/etiket/:tag" element={<TagPage />} />
-          <Route path="/kategori/:categorySlug" element={<CategoryPage />} />
-          <Route path="/:categorySlug/:postSlug" element={<PostPage />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <SiteFooter />
-        <CookieBanner />
-      </BrowserRouter>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <SiteHeader />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/old" element={<AdminPage />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/admin/post/new" element={<AdminPostEditor />} />
+            <Route path="/admin/post/edit/:postId" element={<AdminPostEditor />} />
+            <Route path="/hakkimizda" element={<About />} />
+            <Route path="/iletisim" element={<Contact />} />
+            <Route path="/gizlilik-politikasi" element={<Privacy />} />
+            <Route path="/cerez-politikasi" element={<Cookies />} />
+            <Route path="/editorial-politika" element={<EditorialPolicy />} />
+            <Route path="/reklam-affiliate" element={<AdsDisclosure />} />
+            <Route path="/etiket/:tag" element={<TagPage />} />
+            <Route path="/kategori/:categorySlug" element={<CategoryPage />} />
+            <Route path="/:categorySlug/:postSlug" element={<PostPage />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <SiteFooter />
+          <CookieBanner />
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
