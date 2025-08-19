@@ -1,13 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Settings } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
 
 export const SiteHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user } = useAuth();
 
   return (
     <header className="sticky top-0 z-40 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
@@ -17,21 +14,6 @@ export const SiteHeader = () => {
         </Link>
 
         <div className="flex items-center gap-4">
-          {user && (
-            <Link to="/admin">
-              <Button variant="outline" size="sm" className="hidden md:flex items-center gap-2">
-                <Settings className="w-4 h-4" />
-                Admin
-              </Button>
-            </Link>
-          )}
-          {!user && (
-            <Link to="/auth">
-              <Button variant="outline" size="sm" className="hidden md:flex">
-                Giriş
-              </Button>
-            </Link>
-          )}
           <ThemeToggle />
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -56,15 +38,6 @@ export const SiteHeader = () => {
             <Link to="/iletisim" className="block py-2 px-4 hover:bg-accent rounded-md" onClick={() => setIsMenuOpen(false)}>
               İletişim
             </Link>
-            {user ? (
-              <Link to="/admin" className="block py-2 px-4 hover:bg-accent rounded-md" onClick={() => setIsMenuOpen(false)}>
-                Admin Panel
-              </Link>
-            ) : (
-              <Link to="/auth" className="block py-2 px-4 hover:bg-accent rounded-md" onClick={() => setIsMenuOpen(false)}>
-                Giriş Yap
-              </Link>
-            )}
           </div>
         </div>
       )}

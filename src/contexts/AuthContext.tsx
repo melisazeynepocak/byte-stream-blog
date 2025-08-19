@@ -6,6 +6,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  role: string | null;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -17,6 +18,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [role, setRole] = useState<string | null>(null);
+
+  const fetchUserRole = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single();
+      
+      if (error) throw error;
+      setRole(data?.role || null);
+    } catch (error) {
+      console.error('Error fetching user role:', error);
+      setRole(null);
+    }
+  };
 
   useEffect(() => {
     // Set up auth state listener
@@ -25,6 +43,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Fetch user role after auth state change
+        if (session?.user) {
+          setTimeout(() => {
+            fetchUserRole(session.user.id);
+          }, 0);
+        } else {
+          setRole(null);
+        }
       }
     );
 
@@ -33,6 +60,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      
+      // Fetch user role for initial session
+      if (session?.user) {
+        setTimeout(() => {
+          fetchUserRole(session.user.id);
+        }, 0);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -67,6 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     session,
     loading,
+    role,
     signIn,
     signUp,
     signOut,

@@ -22,6 +22,7 @@ interface Category {
 interface PostFormData {
   title: string;
   subtitle: string;
+  excerpt: string;
   content: string;
   category_id: string;
   tags: string;
@@ -30,7 +31,7 @@ interface PostFormData {
 }
 
 export default function AdminPostEditor() {
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { postId } = useParams();
   const { toast } = useToast();
@@ -44,6 +45,7 @@ export default function AdminPostEditor() {
   const [formData, setFormData] = useState<PostFormData>({
     title: "",
     subtitle: "",
+    excerpt: "",
     content: "",
     category_id: "",
     tags: "",
@@ -51,20 +53,13 @@ export default function AdminPostEditor() {
   });
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-      return;
+    fetchCategories();
+    if (isEditing) {
+      fetchPost();
+    } else {
+      setLoading(false);
     }
-    
-    if (user) {
-      fetchCategories();
-      if (isEditing) {
-        fetchPost();
-      } else {
-        setLoading(false);
-      }
-    }
-  }, [user, authLoading, navigate, isEditing, postId]);
+  }, [isEditing, postId]);
 
   const fetchCategories = async () => {
     try {
@@ -100,6 +95,7 @@ export default function AdminPostEditor() {
         setFormData({
           title: data.title,
           subtitle: data.subtitle || "",
+          excerpt: data.excerpt || "",
           content: data.content,
           category_id: data.category_id,
           tags: data.tags?.join(", ") || "",
@@ -136,22 +132,22 @@ export default function AdminPostEditor() {
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !user) return;
+    if (!file) return;
 
     setUploading(true);
     
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      const fileName = `${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('blog-images')
+        .from('images')
         .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
       const { data } = supabase.storage
-        .from('blog-images')
+        .from('images')
         .getPublicUrl(fileName);
 
       setFormData(prev => ({ ...prev, cover_image: data.publicUrl }));
@@ -171,7 +167,7 @@ export default function AdminPostEditor() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, asDraft = false) => {
     e.preventDefault();
     if (!user) return;
 
@@ -180,16 +176,20 @@ export default function AdminPostEditor() {
     try {
       const slug = createSlug(formData.title);
       const tagsArray = formData.tags.split(',').map(tag => tag.trim()).filter(Boolean);
+      const status = asDraft ? 'draft' : 'published';
 
       const postData = {
         title: formData.title,
         subtitle: formData.subtitle,
+        excerpt: formData.excerpt,
         content: formData.content,
         category_id: formData.category_id,
         tags: tagsArray,
         featured: formData.featured,
         cover_image: formData.cover_image,
         slug,
+        status,
+        published_at: status === 'published' ? new Date().toISOString() : null,
         user_id: user.id,
       };
 
@@ -203,7 +203,7 @@ export default function AdminPostEditor() {
         
         toast({
           title: "Başarılı",
-          description: "Yazı güncellendi",
+          description: `Yazı ${status === 'draft' ? 'taslak olarak kaydedildi' : 'güncellendi ve yayınlandı'}`,
         });
       } else {
         const { error } = await supabase
@@ -214,7 +214,7 @@ export default function AdminPostEditor() {
         
         toast({
           title: "Başarılı",
-          description: "Yazı oluşturuldu",
+          description: `Yazı ${status === 'draft' ? 'taslak olarak kaydedildi' : 'oluşturuldu ve yayınlandı'}`,
         });
       }
 
@@ -230,16 +230,12 @@ export default function AdminPostEditor() {
     }
   };
 
-  if (authLoading || loading) {
+  if (loading) {
     return (
       <div className="container mx-auto py-8">
         <div className="animate-pulse">Yükleniyor...</div>
       </div>
     );
-  }
-
-  if (!user) {
-    return null;
   }
 
   return (
@@ -301,6 +297,17 @@ export default function AdminPostEditor() {
                   id="subtitle"
                   value={formData.subtitle}
                   onChange={(e) => setFormData(prev => ({ ...prev, subtitle: e.target.value }))}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="excerpt">Özet</Label>
+                <Textarea
+                  id="excerpt"
+                  value={formData.excerpt}
+                  onChange={(e) => setFormData(prev => ({ ...prev, excerpt: e.target.value }))}
+                  rows={3}
+                  placeholder="Yazının kısa bir özeti..."
                 />
               </div>
 
@@ -377,8 +384,20 @@ export default function AdminPostEditor() {
               </div>
 
               <div className="flex gap-4">
-                <Button type="submit" disabled={saving || !formData.category_id}>
-                  {saving ? "Kaydediliyor..." : (isEditing ? "Güncelle" : "Yayınla")}
+                <Button 
+                  type="button" 
+                  onClick={(e) => handleSubmit(e, true)} 
+                  disabled={saving || !formData.category_id}
+                  variant="outline"
+                >
+                  {saving ? "Kaydediliyor..." : "Taslak Kaydet"}
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={(e) => handleSubmit(e, false)} 
+                  disabled={saving || !formData.category_id}
+                >
+                  {saving ? "Yayınlanıyor..." : (isEditing ? "Güncelle ve Yayınla" : "Yayınla")}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => navigate("/admin")}>
                   İptal

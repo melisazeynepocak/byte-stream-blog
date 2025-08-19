@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedAdminRoute } from "@/components/ProtectedAdminRoute";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import SiteHeader from "@/components/layout/SiteHeader";
@@ -35,11 +36,23 @@ const App = () => (
           <SiteHeader />
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin" element={
+              <ProtectedAdminRoute>
+                <AdminDashboard />
+              </ProtectedAdminRoute>
+            } />
             <Route path="/admin/old" element={<AdminPage />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/admin/post/new" element={<AdminPostEditor />} />
-            <Route path="/admin/post/edit/:postId" element={<AdminPostEditor />} />
+            <Route path="/admin/post/new" element={
+              <ProtectedAdminRoute>
+                <AdminPostEditor />
+              </ProtectedAdminRoute>
+            } />
+            <Route path="/admin/post/edit/:postId" element={
+              <ProtectedAdminRoute>
+                <AdminPostEditor />
+              </ProtectedAdminRoute>
+            } />
             <Route path="/hakkimizda" element={<About />} />
             <Route path="/iletisim" element={<Contact />} />
             <Route path="/gizlilik-politikasi" element={<Privacy />} />

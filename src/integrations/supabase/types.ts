@@ -41,9 +41,12 @@ export type Database = {
           content: string
           cover_image: string | null
           created_at: string
+          excerpt: string | null
           featured: boolean | null
           id: string
+          published_at: string | null
           slug: string
+          status: string | null
           subtitle: string | null
           tags: string[] | null
           title: string
@@ -56,9 +59,12 @@ export type Database = {
           content: string
           cover_image?: string | null
           created_at?: string
+          excerpt?: string | null
           featured?: boolean | null
           id?: string
+          published_at?: string | null
           slug: string
+          status?: string | null
           subtitle?: string | null
           tags?: string[] | null
           title: string
@@ -71,9 +77,12 @@ export type Database = {
           content?: string
           cover_image?: string | null
           created_at?: string
+          excerpt?: string | null
           featured?: boolean | null
           id?: string
+          published_at?: string | null
           slug?: string
+          status?: string | null
           subtitle?: string | null
           tags?: string[] | null
           title?: string
@@ -91,12 +100,33 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          role?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { user_id: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

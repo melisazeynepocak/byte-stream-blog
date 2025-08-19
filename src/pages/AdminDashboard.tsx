@@ -19,32 +19,28 @@ interface Post {
   id: string;
   title: string;
   subtitle: string;
+  excerpt: string;
   slug: string;
   category_id: string;
   categories: Category;
   featured: boolean;
   views: number;
+  status: string;
+  published_at: string;
   created_at: string;
   cover_image?: string;
 }
 
 export default function AdminDashboard() {
-  const { user, signOut, loading: authLoading } = useAuth();
+  const { signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-      return;
-    }
-    
-    if (user) {
-      fetchPosts();
-    }
-  }, [user, authLoading, navigate]);
+    fetchPosts();
+  }, []);
 
   const fetchPosts = async () => {
     try {
@@ -105,16 +101,12 @@ export default function AdminDashboard() {
     navigate("/");
   };
 
-  if (authLoading || loading) {
+  if (loading) {
     return (
       <div className="container mx-auto py-8">
         <div className="animate-pulse">Yükleniyor...</div>
       </div>
     );
-  }
-
-  if (!user) {
-    return null;
   }
 
   return (
@@ -157,6 +149,8 @@ export default function AdminDashboard() {
                       <CardTitle className="flex items-center gap-2">
                         {post.title}
                         {post.featured && <Badge variant="secondary">Öne Çıkan</Badge>}
+                        {post.status === 'draft' && <Badge variant="outline">Taslak</Badge>}
+                        {post.status === 'published' && <Badge variant="default">Yayınlandı</Badge>}
                       </CardTitle>
                       <CardDescription>{post.subtitle}</CardDescription>
                       <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
@@ -166,6 +160,9 @@ export default function AdminDashboard() {
                           {post.views} görüntüleme
                         </span>
                         <span>{new Date(post.created_at).toLocaleDateString('tr-TR')}</span>
+                        {post.published_at && (
+                          <span>Yayın: {new Date(post.published_at).toLocaleDateString('tr-TR')}</span>
+                        )}
                       </div>
                     </div>
                     {post.cover_image && (
