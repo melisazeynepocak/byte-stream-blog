@@ -1,14 +1,17 @@
-import { Post } from "@/lib/blogData";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 
-export const PostCard = ({ post }: { post: Post }) => {
-  const to = `/${post.category.slug}/${post.slug}`;
+export const PostCard = ({ post }: { post: any }) => {
+  const categorySlug = post?.category?.slug || post?.category_slug || "genel";
+  const categoryName = post?.category?.name || (post?.category_name ?? categorySlug);
+  const to = `/${categorySlug}/${post.slug}`;
+  const cover = post?.cover || post?.cover_image || "/placeholder.svg";
+  const tags = Array.isArray(post?.tags) ? post.tags : [];
   return (
     <article className="rounded-lg border bg-card">
       <Link to={to} className="block">
         <img
-          src={post.cover}
+          src={cover}
           alt={`${post.title} görseli`}
           loading="lazy"
           decoding="async"
@@ -16,15 +19,15 @@ export const PostCard = ({ post }: { post: Post }) => {
         />
       </Link>
       <div className="p-4">
-        <Link to={`/kategori/${post.category.slug}`} className="text-xs text-primary">
-          {post.category.name}
+        <Link to={`/kategori/${categorySlug}`} className="text-xs text-primary">
+          {categoryName}
         </Link>
         <Link to={to} className="block mt-1 font-semibold text-lg leading-snug hover:underline line-clamp-2">
           {post.title}
         </Link>
-        <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{post.subtitle}</p>
+        {post.subtitle && <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{post.subtitle}</p>}
         <div className="mt-3 flex flex-wrap gap-2">
-          {post.tags.slice(0, 3).map((t) => (
+          {tags.slice(0, 3).map((t: string) => (
             <Badge key={t} variant="secondary">#{t}</Badge>
           ))}
         </div>

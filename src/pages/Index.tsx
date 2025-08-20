@@ -40,12 +40,13 @@ const Index = () => {
       query = query.or(`title.ilike.%${q}%,subtitle.ilike.%${q}%,excerpt.ilike.%${q}%`);
     }
 
-    const { data } = await query;
+    const { data } = await query as any;
     
-    const formattedPosts = (data || []).map(post => ({
+    const rows: any[] = (data as any[]) || [];
+    const formattedPosts = rows.map((post: any) => ({
       ...post,
-      category: post.categories,
-      cover: post.cover_image || "/placeholder.svg"
+      category: post.categories || (post.category_slug ? { slug: post.category_slug, name: post.category_slug } : null),
+      cover: post.cover_image || "/placeholder.svg",
     }));
 
     setPosts(formattedPosts);

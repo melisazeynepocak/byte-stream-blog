@@ -18,24 +18,18 @@ const CategoryPage = () => {
 
   const fetchCategoryPosts = async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("posts")
-      .select(`
-        *,
-        categories!posts_category_id_fkey (
-          id,
-          name,
-          slug
-        )
-      `)
-      .eq("categories.slug", categorySlug)
+      .select("*")
+      .eq("category_slug", categorySlug)
       .eq("status", "published")
       .order("published_at", { ascending: false });
 
-    const formattedPosts = (data || []).map(post => ({
+    const rows: any[] = (data as any[]) || [];
+    const formattedPosts = rows.map((post: any) => ({
       ...post,
-      category: post.categories,
-      cover: post.cover_image || "/placeholder.svg"
+      category: post.categories || { slug: post.category_slug, name: post.category_slug },
+      cover: post.cover_image || "/placeholder.svg",
     }));
 
     setPosts(formattedPosts);
