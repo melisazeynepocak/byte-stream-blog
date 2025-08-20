@@ -11,7 +11,7 @@ import SiteHeader from "@/components/layout/SiteHeader";
 import SiteFooter from "@/components/layout/SiteFooter";
 import CategoryPage from "@/pages/Category";
 import PostPage from "@/pages/Post";
-import AdminPage from "@/pages/Admin";
+import AdminPage from "@/pages/AdminDashboard";
 import Auth from "@/pages/Auth";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminPostEditor from "@/pages/AdminPostEditor";
