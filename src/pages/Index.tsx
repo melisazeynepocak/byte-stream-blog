@@ -1,26 +1,59 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { FeaturedSlider } from "@/components/blog/FeaturedSlider";
 import { PostCard } from "@/components/blog/PostCard";
 import { Sidebar } from "@/components/blog/Sidebar";
 import AdSlot from "@/components/AdSlot";
 import { Seo } from "@/components/Seo";
 import { Button } from "@/components/ui/button";
-import { getFeaturedPosts, getPosts, searchPosts } from "@/lib/blogData";
+import { supabase } from "@/integrations/supabase/client";
 import { useSearchParams } from "react-router-dom";
 
 const Index = () => {
   const [params] = useSearchParams();
   const q = params.get("q") || "";
-  const [posts, setPosts] = useState(getPosts());
+  const [posts, setPosts] = useState<any[]>([]);
+  const [featured, setFeatured] = useState<any[]>([]);
   const [displayedPosts, setDisplayedPosts] = useState(6);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const filteredPosts = q ? searchPosts(q) : getPosts();
-    setPosts(filteredPosts);
-    setDisplayedPosts(6);
+    fetchPosts();
   }, [q]);
 
-  const featured = useMemo(() => getFeaturedPosts(), []);
+  const fetchPosts = async () => {
+    setLoading(true);
+    
+    let query = supabase
+      .from("posts")
+      .select(`
+        *,
+        categories!posts_category_id_fkey (
+          id,
+          name,
+          slug
+        )
+      `)
+      .eq("status", "published")
+      .order("published_at", { ascending: false });
+
+    if (q) {
+      query = query.or(`title.ilike.%${q}%,subtitle.ilike.%${q}%,excerpt.ilike.%${q}%`);
+    }
+
+    const { data } = await query;
+    
+    const formattedPosts = (data || []).map(post => ({
+      ...post,
+      category: post.categories,
+      cover: post.cover_image || "/placeholder.svg"
+    }));
+
+    setPosts(formattedPosts);
+    setFeatured(formattedPosts.filter(p => p.featured));
+    setDisplayedPosts(6);
+    setLoading(false);
+  };
+
   const postsToShow = posts.slice(0, displayedPosts);
   const hasMorePosts = displayedPosts < posts.length;
 
@@ -63,11 +96,15 @@ const Index = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-8">
           <section className="lg:col-span-8 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {postsToShow.map((p) => (
-                <PostCard key={p.id} post={p} />
-              ))}
-            </div>
+            {loading ? (
+              <div>Yükleniyor...</div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {postsToShow.map((p) => (
+                  <PostCard key={p.id} post={p} />
+                ))}
+              </div>
+            )}
             
             {hasMorePosts && (
               <div className="flex justify-center mt-8">

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { supabase } from "../lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { Seo } from "@/components/Seo";
 import { Badge } from "@/components/ui/badge";
 import { PostCard } from "@/components/blog/PostCard";
@@ -13,18 +13,34 @@ const CategoryPage = () => {
 
   useEffect(() => {
     if (!categorySlug) return;
-    setLoading(true);
-    supabase
-      .from("posts")
-      .select("*")
-      .eq("category_slug", categorySlug)
-      .eq("status", "published")
-      .order("published_at", { ascending: false })
-      .then(({ data }) => {
-        setPosts(data || []);
-        setLoading(false);
-      });
+    fetchCategoryPosts();
   }, [categorySlug]);
+
+  const fetchCategoryPosts = async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from("posts")
+      .select(`
+        *,
+        categories!posts_category_id_fkey (
+          id,
+          name,
+          slug
+        )
+      `)
+      .eq("categories.slug", categorySlug)
+      .eq("status", "published")
+      .order("published_at", { ascending: false });
+
+    const formattedPosts = (data || []).map(post => ({
+      ...post,
+      category: post.categories,
+      cover: post.cover_image || "/placeholder.svg"
+    }));
+
+    setPosts(formattedPosts);
+    setLoading(false);
+  };
 
   return (
     <>
