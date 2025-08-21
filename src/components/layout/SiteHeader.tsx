@@ -1,14 +1,85 @@
 // src/components/layout/Header.tsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ChevronDown, Cpu, Smartphone, Tablet as TabletIcon,
-  Bot, Shield, Gamepad2, Newspaper
+  Bot, Shield, Gamepad2, Newspaper, Search, Menu,
+  Clock, Globe, Building, Calendar, Monitor, Code, Settings,
+  Smartphone as PhoneIcon, Laptop, Headphones, Play, 
+  BarChart3, BookOpen, Lightbulb, Rocket, Brain, Bitcoin,
+  Satellite, Atom, Dna, Trophy
 } from "lucide-react";
 
 type Category = { id: string; name: string; slug: string };
 type Featured = { id: string; title: string; slug: string; cover_image: string | null; categories?: { slug: string } | null };
+
+// Yeni menü yapısı
+const MENU_STRUCTURE = {
+  haberler: {
+    title: "Haberler",
+    icon: <Newspaper className="w-4 h-4" />,
+    submenu: [
+      { title: "Son Dakika", icon: <Clock className="w-4 h-4" />, href: "/haber/son-dakika" },
+      { title: "Dünya Teknoloji Gelişmeleri", icon: <Globe className="w-4 h-4" />, href: "/haber/dunya" },
+      { title: "Türkiye'den Haberler", icon: <Building className="w-4 h-4" />, href: "/haber/turkiye" },
+      { title: "Şirket Haberleri", icon: <Building className="w-4 h-4" />, href: "/haber/sirket" },
+      { title: "Etkinlikler", icon: <Calendar className="w-4 h-4" />, href: "/haber/etkinlikler" }
+    ]
+  },
+  incelemeler: {
+    title: "İncelemeler",
+    icon: <Monitor className="w-4 h-4" />,
+    submenu: [
+      { title: "Telefon İncelemeleri", icon: <PhoneIcon className="w-4 h-4" />, href: "/inceleme/telefon" },
+      { title: "Laptop & PC", icon: <Laptop className="w-4 h-4" />, href: "/inceleme/laptop" },
+      { title: "Uygulama & Yazılım", icon: <Code className="w-4 h-4" />, href: "/inceleme/yazilim" },
+      { title: "Aksesuar & Donanım", icon: <Headphones className="w-4 h-4" />, href: "/inceleme/aksesuar" },
+      { title: "Video İncelemeler", icon: <Play className="w-4 h-4" />, href: "/inceleme/video" }
+    ]
+  },
+  karsilastirmalar: {
+    title: "Karşılaştırmalar",
+    icon: <BarChart3 className="w-4 h-4" />,
+    submenu: [
+      { title: "Telefon Karşılaştırmaları", icon: <PhoneIcon className="w-4 h-4" />, href: "/karsilastirma/telefon" },
+      { title: "Laptop Karşılaştırmaları", icon: <Laptop className="w-4 h-4" />, href: "/karsilastirma/laptop" },
+      { title: "Yazılım Karşılaştırmaları", icon: <Code className="w-4 h-4" />, href: "/karsilastirma/yazilim" },
+      { title: "Tablo Görünümü", icon: <BarChart3 className="w-4 h-4" />, href: "/karsilastirma/tablo" }
+    ]
+  },
+  rehberler: {
+    title: "Rehberler",
+    icon: <BookOpen className="w-4 h-4" />,
+    submenu: [
+      { title: "Başlangıç Seviyesi", icon: <Settings className="w-4 h-4" />, href: "/rehber/baslangic" },
+      { title: "Uzman Rehberleri", icon: <Brain className="w-4 h-4" />, href: "/rehber/uzman" },
+      { title: "İpuçları & Hileler", icon: <Lightbulb className="w-4 h-4" />, href: "/rehber/ipuclari" }
+    ]
+  },
+  oyun: {
+    title: "Oyun Dünyası",
+    icon: <Gamepad2 className="w-4 h-4" />,
+    submenu: [
+      { title: "Oyun Haberleri", icon: <Newspaper className="w-4 h-4" />, href: "/oyun/haberler" },
+      { title: "Konsol Dünyası", icon: <Gamepad2 className="w-4 h-4" />, href: "/oyun/konsol" },
+      { title: "PC Oyunları", icon: <Monitor className="w-4 h-4" />, href: "/oyun/pc" },
+      { title: "Mobil Oyunlar", icon: <PhoneIcon className="w-4 h-4" />, href: "/oyun/mobil" },
+      { title: "E-Spor", icon: <Trophy className="w-4 h-4" />, href: "/oyun/espor" }
+    ]
+  },
+  gelecek: {
+    title: "Gelecek Teknolojiler",
+    icon: <Rocket className="w-4 h-4" />,
+    submenu: [
+      { title: "Yapay Zekâ", icon: <Brain className="w-4 h-4" />, href: "/gelecek/yapay-zeka" },
+      { title: "Blockchain & Kripto", icon: <Bitcoin className="w-4 h-4" />, href: "/gelecek/blockchain" },
+      { title: "Uzay Teknolojileri", icon: <Satellite className="w-4 h-4" />, href: "/gelecek/uzay" },
+      { title: "Kuantum Bilgisayar", icon: <Atom className="w-4 h-4" />, href: "/gelecek/kuantum" },
+      { title: "Biyoteknoloji", icon: <Dna className="w-4 h-4" />, href: "/gelecek/biyoteknoloji" }
+    ]
+  }
+};
 
 const GROUP_MAP: Record<string, "devices" | "software" | "market" | "other"> = {
   telefonlar: "devices",
@@ -33,10 +104,11 @@ const groupIcon: Record<string, JSX.Element> = {
 
 export default function Header() {
   const [cats, setCats] = useState<Category[]>([]);
-  const [open, setOpen] = useState(false);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [drawer, setDrawer] = useState(false);
   const [featured, setFeatured] = useState<Featured | null>(null);
   const location = useLocation();
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     (async () => {
@@ -53,9 +125,26 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    setOpen(false);
+    setOpenMenu(null);
     setDrawer(false);
   }, [location.pathname]);
+
+  // Click outside to close menu
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpenMenu(null);
+      }
+    }
+
+    if (openMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [openMenu]);
 
   const grouped = useMemo(() => {
     const g = { devices: [] as Category[], software: [] as Category[], market: [] as Category[], other: [] as Category[] };
@@ -63,62 +152,118 @@ export default function Header() {
     return g;
   }, [cats]);
 
+  const handleMenuToggle = (menuKey: string) => {
+    setOpenMenu(openMenu === menuKey ? null : menuKey);
+  };
+
   return (
-    <div className="sticky top-0 z-50 border-b border-white/20 dark:border-white/10 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl">
-      <div className="container mx-auto h-14 px-3 flex items-center justify-between">
-        <Link to="/" className="font-black text-lg tracking-tight">
-          <span className="bg-gradient-to-r from-indigo-600 to-fuchsia-600 bg-clip-text text-transparent">
-            TeknoBlogoji
-          </span>
+    <div className="sticky top-0 z-50 border-b border-white/20 dark:border-white/10 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl shadow-lg">
+      <div className="container mx-auto h-16 px-4 flex items-center justify-between">
+        {/* Logo */}
+        <Link to="/" className="group">
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-fuchsia-600 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
+                <span className="text-white font-bold text-sm">T</span>
+              </div>
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full animate-pulse"></div>
+            </div>
+            <span className="font-black text-xl tracking-tight bg-gradient-to-r from-indigo-600 via-purple-600 to-fuchsia-600 bg-clip-text text-transparent group-hover:from-indigo-500 group-hover:via-purple-500 group-hover:to-fuchsia-500 transition-all duration-300">
+              TeknoBlogoji
+            </span>
+          </div>
         </Link>
 
-        <ul className="hidden md:flex items-center gap-6 text-sm">
-          <NavLink to="/">Anasayfa</NavLink>
-          <NavLink to="/haber">Haber</NavLink>
-          <NavLink to="/inceleme">İnceleme</NavLink>
-          <NavLink to="/rehber">Rehber</NavLink>
+        {/* Navigation */}
+        <nav className="hidden lg:flex items-center gap-1" ref={menuRef}>
+          {/* Ana Menü Öğeleri */}
+          {Object.entries(MENU_STRUCTURE).map(([key, menu]) => (
+            <div key={key} className="relative">
+              <button
+                onClick={() => handleMenuToggle(key)}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 font-medium ${
+                  openMenu === key 
+                    ? 'bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/50 dark:to-purple-950/50 text-primary' 
+                    : 'hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-950/50 dark:hover:to-purple-950/50 hover:text-primary'
+                }`}
+              >
+                {menu.icon}
+                {menu.title}
+                <ChevronDown size={16} className={`transition-transform duration-300 ${openMenu === key ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {/* Dropdown Menu */}
+              {openMenu === key && (
+                <div className="absolute top-full left-0 mt-2 w-80 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl rounded-xl border border-white/20 dark:border-white/10 shadow-[0_25px_80px_-15px_rgba(0,0,0,0.4)] p-4">
+                  <div className="space-y-1">
+                    {menu.submenu.map((item, index) => (
+                      <Link
+                        key={index}
+                        to={item.href}
+                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-950/50 dark:hover:to-purple-950/50 transition-all duration-300 group"
+                        onClick={() => setOpenMenu(null)}
+                      >
+                        <span className="text-muted-foreground group-hover:text-primary transition-colors duration-300">
+                          {item.icon}
+                        </span>
+                        <span className="font-medium group-hover:text-primary transition-colors duration-300">
+                          {item.title}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </nav>
 
-          <li
-            className="relative"
-            onMouseEnter={() => setOpen(true)}
-            onMouseLeave={() => setOpen(false)}
-          >
-            <button className="inline-flex items-center gap-1 hover:text-primary transition">
-              Kategoriler <ChevronDown size={16} />
-            </button>
-            {open && <MegaMenu groups={grouped} featured={featured} />}
-          </li>
-        </ul>
-
-        <div className="flex items-center gap-2">
+        {/* Search and Mobile Menu */}
+        <div className="flex items-center gap-3">
           <SearchButton />
           <button
-            className="md:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition"
+            className="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-950/50 dark:hover:to-purple-950/50 transition-all duration-300"
             onClick={() => setDrawer(true)}
             aria-label="Menüyü aç"
           >
-            ☰
+            <Menu size={20} />
           </button>
         </div>
       </div>
 
       {/* Mobile Drawer */}
       {drawer && (
-        <div className="fixed inset-0 z-[60] md:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setDrawer(false)} />
-          <div className="absolute left-0 top-0 h-full w-[86%] max-w-[360px] bg-white dark:bg-zinc-950 p-4 shadow-2xl">
-            <div className="flex items-center justify-between mb-3">
+        <div className="fixed inset-0 z-[60] lg:hidden">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setDrawer(false)} />
+          <div className="absolute left-0 top-0 h-full w-[86%] max-w-[360px] bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl p-6 shadow-2xl border-r border-white/20 dark:border-white/10 overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
               <Link to="/" className="font-black text-lg">TeknoBlogoji</Link>
-              <button onClick={() => setDrawer(false)} className="text-2xl leading-none">×</button>
+              <button onClick={() => setDrawer(false)} className="text-2xl leading-none hover:text-primary transition-colors">×</button>
             </div>
-            <MobileSection title="Cihazlar" items={grouped.devices} />
-            <MobileSection title="Yazılım & Servis" items={grouped.software} />
-            <MobileSection title="Pazar & Trend" items={grouped.market} />
-            {grouped.other.length > 0 && <MobileSection title="Diğer" items={grouped.other} />}
-            <hr className="my-3" />
-            <Link className="block py-2" to="/haber">Haber</Link>
-            <Link className="block py-2" to="/inceleme">İnceleme</Link>
-            <Link className="block py-2" to="/rehber">Rehber</Link>
+            
+            {/* Mobile Menu Items */}
+            <div className="space-y-4">
+              {Object.entries(MENU_STRUCTURE).map(([key, menu]) => (
+                <div key={key} className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                    {menu.icon}
+                    {menu.title}
+                  </div>
+                  <div className="ml-6 space-y-1">
+                    {menu.submenu.map((item, index) => (
+                      <Link
+                        key={index}
+                        to={item.href}
+                        className="block py-2 px-3 rounded-lg hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-950/50 dark:hover:to-purple-950/50 transition-all duration-300 text-sm"
+                        onClick={() => setDrawer(false)}
+                      >
+                        {item.title}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -131,108 +276,11 @@ function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
     <li>
       <Link
         to={to}
-        className="relative inline-block py-1 hover:text-primary transition after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-[2px] after:w-0 after:bg-gradient-to-r after:from-indigo-600 after:to-fuchsia-600 hover:after:w-full after:transition-all"
+        className="relative inline-block py-2 px-3 rounded-lg hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-950/50 dark:hover:to-purple-950/50 transition-all duration-300 hover:text-primary font-medium after:content-[''] after:absolute after:left-1/2 after:-bottom-1 after:h-[2px] after:w-0 after:bg-gradient-to-r after:from-indigo-600 after:to-fuchsia-600 hover:after:w-full hover:after:left-0 after:transition-all after:duration-300"
       >
         {children}
       </Link>
     </li>
-  );
-}
-
-/* ---------- MEGA MENU (desktop) ---------- */
-function MegaMenu({
-  groups,
-  featured,
-}: {
-  groups: Record<string, Category[]>;
-  featured: Featured | null;
-}) {
-  return (
-    <div className="absolute left-1/2 -translate-x-1/2 mt-3 w-[980px] rounded-2xl border border-white/20 dark:border-white/10 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.35)] p-6 grid grid-cols-4 gap-6">
-      <MenuColumn title="Cihazlar" icon={groupIcon.devices} items={groups.devices} />
-      <MenuColumn title="Yazılım & Servis" icon={groupIcon.software} items={groups.software} />
-      <MenuColumn title="Pazar & Trend" icon={groupIcon.market} items={groups.market.length ? groups.market : groups.other} />
-
-      {/* Featured card */}
-      <div className="col-span-1">
-        <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Öne Çıkan</div>
-        {featured ? (
-          <Link
-            to={`/${featured.categories?.slug ?? "teknoloji"}/${featured.slug}`}
-            className="group block overflow-hidden rounded-xl ring-1 ring-black/5 dark:ring-white/10 shadow hover:shadow-lg transition"
-          >
-            <div
-              className="h-32 w-full bg-cover bg-center"
-              style={{
-                backgroundImage: `url(${featured.cover_image ?? ""})`,
-              }}
-            />
-            <div className="p-3">
-              <div className="line-clamp-2 text-sm font-semibold group-hover:text-primary transition">
-                {featured.title}
-              </div>
-            </div>
-          </Link>
-        ) : (
-          <div className="h-40 rounded-xl bg-gradient-to-br from-zinc-100 to-white dark:from-zinc-800 dark:to-zinc-900 animate-pulse" />
-        )}
-      </div>
-    </div>
-  );
-}
-
-function MenuColumn({
-  title,
-  icon,
-  items,
-}: {
-  title: string;
-  icon: JSX.Element;
-  items: Category[];
-}) {
-  return (
-    <div>
-      <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground mb-2">
-        <span className="p-1.5 rounded-md bg-black/5 dark:bg-white/10">{icon}</span>
-        {title}
-      </div>
-      <ul className="space-y-1">
-        {items.map((it) => (
-          <li key={it.id}>
-            <Link
-              to={`/kategori/${it.slug}`}
-              className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 hover:bg-black/5 dark:hover:bg-white/10 transition"
-            >
-              <span>{it.name}</span>
-              {/* küçük örnek ikonlar (opsiyonel) */}
-              {it.slug === "telefonlar" && <Smartphone className="w-3.5 h-3.5 opacity-60" />}
-              {it.slug === "tablet" && <TabletIcon className="w-3.5 h-3.5 opacity-60" />}
-              {it.slug === "internet-guvenlik" && <Shield className="w-3.5 h-3.5 opacity-60" />}
-              {it.slug === "oyun" && <Gamepad2 className="w-3.5 h-3.5 opacity-60" />}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-/* ---------- MOBILE SECTIONS ---------- */
-function MobileSection({ title, items }: { title: string; items: Category[] }) {
-  if (!items.length) return null;
-  return (
-    <div className="mb-3">
-      <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">{title}</div>
-      <ul className="space-y-1">
-        {items.map((it) => (
-          <li key={it.id}>
-            <Link to={`/kategori/${it.slug}`} className="block rounded-lg px-2 py-2 hover:bg-black/5 dark:hover:bg-white/10">
-              {it.name}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
   );
 }
 
@@ -241,9 +289,10 @@ function SearchButton() {
   return (
     <Link
       to="/ara"
-      className="inline-flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg border border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/10 transition"
+      className="inline-flex items-center gap-2 text-sm px-4 py-2 rounded-lg border border-white/20 dark:border-white/10 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-950/50 dark:hover:to-purple-950/50 transition-all duration-300 hover:border-indigo-200 dark:hover:border-indigo-800 group"
     >
-      🔍 <span className="hidden sm:inline">Ara</span>
+      <Search size={16} className="group-hover:text-primary transition-colors duration-300" />
+      <span className="hidden sm:inline font-medium group-hover:text-primary transition-colors duration-300">Ara</span>
     </Link>
   );
 }
