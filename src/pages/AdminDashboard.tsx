@@ -119,6 +119,18 @@ export default function AdminDashboard() {
             <p className="text-muted-foreground">Blog yazılarınızı yönetin</p>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate("/admin/headlines")}>
+              Manşetler
+            </Button>
+            <Button variant="outline" onClick={() => navigate("/admin/trending")}>
+              Trend Konular
+            </Button>
+            <Button variant="outline" onClick={() => navigate("/admin/featured-review")}>
+              Öne Çıkan İnceleme
+            </Button>
+            <Button variant="outline" onClick={() => navigate("/admin/popular-guides")}>
+              Popüler Rehberler
+            </Button>
             <Button onClick={() => navigate("/admin/post/new")} className="flex items-center gap-2">
               <Plus className="w-4 h-4" />
               Yeni Yazı

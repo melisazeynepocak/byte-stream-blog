@@ -100,6 +100,38 @@ export type Database = {
           },
         ]
       }
+      headlines: {
+        Row: {
+          id: string
+          post_id: string
+          position: number
+          created_by: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          post_id: string
+          position: number
+          created_by: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          post_id?: string
+          position?: number
+          created_by?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: null
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -117,6 +149,97 @@ export type Database = {
           role?: string
         }
         Relationships: []
+      }
+      trending_tags: {
+        Row: {
+          id: string
+          label: string
+          slug: string
+          position: number
+          created_by: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          label: string
+          slug: string
+          position: number
+          created_by: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          label?: string
+          slug?: string
+          position?: number
+          created_by?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      featured_review: {
+        Row: {
+          id: string
+          post_id: string
+          created_by: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          post_id: string
+          created_by: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          post_id?: string
+          created_by?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: null
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      popular_guides: {
+        Row: {
+          id: string
+          mode: string
+          post_id: string | null
+          position: number | null
+          created_by: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          mode: string
+          post_id?: string | null
+          position?: number | null
+          created_by: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          mode?: string
+          post_id?: string | null
+          position?: number | null
+          created_by?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: null
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {

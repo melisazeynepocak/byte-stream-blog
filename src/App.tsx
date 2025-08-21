@@ -15,6 +15,10 @@ import AdminPage from "@/pages/AdminDashboard";
 import Auth from "@/pages/Auth";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminPostEditor from "@/pages/AdminPostEditor";
+import AdminHeadlines from "@/pages/AdminHeadlines";
+import AdminTrendingTags from "@/pages/AdminTrendingTags";
+import AdminFeaturedReview from "@/pages/AdminFeaturedReview";
+import AdminPopularGuides from "@/pages/AdminPopularGuides";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
 import Privacy from "@/pages/Privacy";
@@ -46,6 +50,26 @@ const App = () => (
             <Route path="/admin/post/new" element={
               <ProtectedAdminRoute>
                 <AdminPostEditor />
+              </ProtectedAdminRoute>
+            } />
+            <Route path="/admin/headlines" element={
+              <ProtectedAdminRoute>
+                <AdminHeadlines />
+              </ProtectedAdminRoute>
+            } />
+            <Route path="/admin/trending" element={
+              <ProtectedAdminRoute>
+                <AdminTrendingTags />
+              </ProtectedAdminRoute>
+            } />
+            <Route path="/admin/featured-review" element={
+              <ProtectedAdminRoute>
+                <AdminFeaturedReview />
+              </ProtectedAdminRoute>
+            } />
+            <Route path="/admin/popular-guides" element={
+              <ProtectedAdminRoute>
+                <AdminPopularGuides />
               </ProtectedAdminRoute>
             } />
             <Route path="/admin/post/edit/:postId" element={

@@ -30,7 +30,7 @@ export const FeaturedSlider = ({ posts }: FeaturedSliderProps) => {
   return (
     <div className="relative">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold">Öne Çıkanlar</h2>
+        <h2 className="text-2xl font-bold">Manşet Haberler</h2>
         <Button
           variant="outline"
           size="sm"

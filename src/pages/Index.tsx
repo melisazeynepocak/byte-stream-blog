@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import { FeaturedSlider } from "@/components/blog/FeaturedSlider";
+import { TrendingTags } from "@/components/blog/TrendingTags";
+import { FeaturedReview } from "@/components/blog/FeaturedReview";
+import { PopularGuides } from "@/components/blog/PopularGuides";
 import { PostCard } from "@/components/blog/PostCard";
 import { Sidebar } from "@/components/blog/Sidebar";
 import AdSlot from "@/components/AdSlot";
@@ -50,7 +53,50 @@ const Index = () => {
     }));
 
     setPosts(formattedPosts);
-    setFeatured(formattedPosts.filter(p => p.featured));
+    // Fetch curated headlines from headlines table; fallback to featured field if none
+    try {
+      const sb: any = supabase as any;
+      const { data: headlineRows, error: hlErr } = await sb
+        .from('headlines')
+        .select('post_id, position')
+        .order('position', { ascending: true })
+        .limit(5);
+
+      if (hlErr) {
+        setFeatured([]);
+      } else {
+        const headlines = (headlineRows as any[]) || [];
+        if (headlines.length > 0) {
+          const ids = headlines.map(h => h.post_id);
+          const { data: headlinePosts } = await sb
+            .from('posts')
+            .select(`
+              *,
+              categories!posts_category_id_fkey (
+                id,
+                name,
+                slug
+              )
+            `)
+            .in('id', ids)
+            .eq('status', 'published');
+
+          const headlineFormatted = ((headlinePosts as any[]) || []).map((post: any) => ({
+            ...post,
+            category: post.categories || (post.category_slug ? { slug: post.category_slug, name: post.category_slug } : null),
+            cover: post.cover_image || '/placeholder.svg',
+          }));
+
+          const orderMap = new Map(ids.map((id, index) => [id, index]));
+          headlineFormatted.sort((a: any, b: any) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0));
+          setFeatured(headlineFormatted);
+        } else {
+          setFeatured([]);
+        }
+      }
+    } catch {
+      setFeatured([]);
+    }
     setDisplayedPosts(6);
     setLoading(false);
   };
@@ -91,6 +137,9 @@ const Index = () => {
         {!q && (
           <div className="space-y-6">
             {featured.length > 0 && <FeaturedSlider posts={featured.slice(0, 6)} />}
+            <TrendingTags />
+            <FeaturedReview />
+            <PopularGuides />
             <AdSlot slot="top" />
           </div>
         )}
