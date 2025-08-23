@@ -85,9 +85,6 @@ const FeaturedCard = ({ post }: { post: Post }) => {
           <h3 className="mt-2 text-lg md:text-xl font-bold leading-tight line-clamp-2">
             {post.title}
           </h3>
-          <p className="mt-1 text-sm text-muted-foreground line-clamp-2 hidden md:block">
-            {post.subtitle}
-          </p>
         </div>
       </Link>
     </article>

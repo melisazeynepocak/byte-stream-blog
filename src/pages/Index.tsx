@@ -16,7 +16,7 @@ const Index = () => {
   const q = params.get("q") || "";
   const [posts, setPosts] = useState<any[]>([]);
   const [featured, setFeatured] = useState<any[]>([]);
-  const [displayedPosts, setDisplayedPosts] = useState(6);
+  const [displayedPosts, setDisplayedPosts] = useState(12);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -97,7 +97,7 @@ const Index = () => {
     } catch {
       setFeatured([]);
     }
-    setDisplayedPosts(6);
+    setDisplayedPosts(12);
     setLoading(false);
   };
 
@@ -105,7 +105,7 @@ const Index = () => {
   const hasMorePosts = displayedPosts < posts.length;
 
   const loadMore = () => {
-    setDisplayedPosts(prev => prev + 6);
+    setDisplayedPosts(prev => prev + 12);
   };
 
   return (
@@ -129,7 +129,10 @@ const Index = () => {
 
       <main className="container py-8">
         {q ? (
-          <h1 className="text-2xl font-bold mb-6">Arama: “{q}”</h1>
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold mb-2">Arama Sonuçları</h1>
+            <p className="text-muted-foreground">"{q}" için {posts.length} sonuç bulundu</p>
+          </div>
         ) : (
           <h1 className="sr-only">TeknoBlog – Teknoloji Haberleri ve İncelemeler</h1>
         )}

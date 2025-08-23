@@ -131,7 +131,11 @@ export function PopularGuides() {
 
           // Preserve order by position
           const orderMap = new Map(ids.map((id, index) => [id, index]));
-          formattedPosts.sort((a: any, b: any) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0));
+          formattedPosts.sort((a: any, b: any) => {
+            const aOrder = Number(orderMap.get(a.id) ?? 0);
+            const bOrder = Number(orderMap.get(b.id) ?? 0);
+            return aOrder - bOrder;
+          });
           setPosts(formattedPosts);
         }
       } catch {
@@ -177,17 +181,12 @@ export function PopularGuides() {
                 )}
               </div>
               <CardContent className="p-4">
-                <h3 className="font-semibold text-sm mb-1 line-clamp-2">
+                <h3 className="font-bold text-base mb-2 line-clamp-2">
                   {post.title}
                 </h3>
                 {post.subtitle && (
-                  <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+                  <p className="text-sm text-muted-foreground line-clamp-2">
                     {post.subtitle}
-                  </p>
-                )}
-                {post.excerpt && (
-                  <p className="text-xs text-muted-foreground line-clamp-2">
-                    {post.excerpt}
                   </p>
                 )}
               </CardContent>

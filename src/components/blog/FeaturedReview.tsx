@@ -97,19 +97,9 @@ export function FeaturedReview() {
               <Badge variant="secondary" className="mb-2">
                 {post.categories.name}
               </Badge>
-              <h3 className="text-lg font-bold text-white mb-1">
+              <h3 className="text-xl font-black text-white drop-shadow-lg">
                 {post.title}
               </h3>
-              {post.subtitle && (
-                <p className="text-sm text-white/90 mb-2">
-                  {post.subtitle}
-                </p>
-              )}
-              {post.excerpt && (
-                <p className="text-xs text-white/80 line-clamp-2">
-                  {post.excerpt}
-                </p>
-              )}
             </div>
           </div>
         </Link>

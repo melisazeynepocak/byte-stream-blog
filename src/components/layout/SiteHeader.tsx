@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ThemeToggle } from "./ThemeToggle";
+import { SearchModal } from "../SearchModal";
 import {
   ChevronDown, Cpu, Smartphone, Tablet as TabletIcon,
   Bot, Shield, Gamepad2, Newspaper, Search, Menu,
@@ -70,6 +71,7 @@ export default function Header() {
   const [cats, setCats] = useState<Category[]>([]);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [drawer, setDrawer] = useState(false);
+  const [searchModal, setSearchModal] = useState(false);
   const [featured, setFeatured] = useState<Featured | null>(null);
   const location = useLocation();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -199,7 +201,7 @@ export default function Header() {
 
         {/* Search, Theme Toggle and Mobile Menu */}
         <div className="flex items-center gap-3">
-          <SearchButton />
+          <SearchButton onClick={() => setSearchModal(true)} />
           <ThemeToggle />
           <button
             className="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-950/50 dark:hover:to-purple-950/50 transition-all duration-300"
@@ -260,6 +262,11 @@ export default function Header() {
           </div>
         </div>
       )}
+      
+      <SearchModal 
+        isOpen={searchModal} 
+        onClose={() => setSearchModal(false)} 
+      />
     </div>
   );
 }
@@ -278,14 +285,14 @@ function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
 }
 
 /* ---------- SEARCH BUTTON ---------- */
-function SearchButton() {
+function SearchButton({ onClick }: { onClick: () => void }) {
   return (
-    <Link
-      to="/ara"
+    <button
+      onClick={onClick}
       className="inline-flex items-center gap-2 text-sm px-4 py-2 rounded-lg border border-white/20 dark:border-white/10 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-950/50 dark:hover:to-purple-950/50 transition-all duration-300 hover:border-indigo-200 dark:hover:border-indigo-800 group"
     >
       <Search size={16} className="group-hover:text-primary transition-colors duration-300" />
       <span className="hidden sm:inline font-medium group-hover:text-primary transition-colors duration-300">Ara</span>
-    </Link>
+    </button>
   );
 }
