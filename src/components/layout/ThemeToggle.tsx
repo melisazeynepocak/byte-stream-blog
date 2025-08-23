@@ -8,12 +8,15 @@ export const ThemeToggle = () => {
   return (
     <button
       aria-label="Tema değiştir"
-      className="inline-flex items-center gap-2 rounded-md border px-2.5 py-1.5 text-sm hover:bg-accent"
+      className="inline-flex items-center justify-center w-10 h-10 rounded-lg border border-white/20 dark:border-white/10 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-950/50 dark:hover:to-purple-950/50 transition-all duration-300 hover:border-indigo-200 dark:hover:border-indigo-800 group"
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
-      title="Karanlık mod"
+      title={isDark ? 'Açık moda geç' : 'Koyu moda geç'}
     >
-      {isDark ? <Sun size={16} /> : <Moon size={16} />}
-      <span className="hidden md:inline">{isDark ? 'Açık' : 'Koyu'}</span>
+      {isDark ? (
+        <Sun size={18} className="group-hover:text-primary transition-colors duration-300" />
+      ) : (
+        <Moon size={18} className="group-hover:text-primary transition-colors duration-300" />
+      )}
     </button>
   )
 }

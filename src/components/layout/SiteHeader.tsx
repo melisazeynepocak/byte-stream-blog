@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { ThemeToggle } from "./ThemeToggle";
 import {
   ChevronDown, Cpu, Smartphone, Tablet as TabletIcon,
   Bot, Shield, Gamepad2, Newspaper, Search, Menu,
@@ -16,26 +17,15 @@ type Featured = { id: string; title: string; slug: string; cover_image: string |
 
 // Yeni menü yapısı
 const MENU_STRUCTURE = {
-  haberler: {
-    title: "Haberler",
-    icon: <Newspaper className="w-4 h-4" />,
-    submenu: [
-      { title: "Son Dakika", icon: <Clock className="w-4 h-4" />, href: "/haber/son-dakika" },
-      { title: "Dünya Teknoloji Gelişmeleri", icon: <Globe className="w-4 h-4" />, href: "/haber/dunya" },
-      { title: "Türkiye'den Haberler", icon: <Building className="w-4 h-4" />, href: "/haber/turkiye" },
-      { title: "Şirket Haberleri", icon: <Building className="w-4 h-4" />, href: "/haber/sirket" },
-      { title: "Etkinlikler", icon: <Calendar className="w-4 h-4" />, href: "/haber/etkinlikler" }
-    ]
-  },
-  incelemeler: {
-    title: "İncelemeler",
+  Kategoriler: {
+    title: "Kategoriler",
     icon: <Monitor className="w-4 h-4" />,
     submenu: [
-      { title: "Telefon İncelemeleri", icon: <PhoneIcon className="w-4 h-4" />, href: "/inceleme/telefon" },
-      { title: "Laptop & PC", icon: <Laptop className="w-4 h-4" />, href: "/inceleme/laptop" },
-      { title: "Uygulama & Yazılım", icon: <Code className="w-4 h-4" />, href: "/inceleme/yazilim" },
-      { title: "Aksesuar & Donanım", icon: <Headphones className="w-4 h-4" />, href: "/inceleme/aksesuar" },
-      { title: "Video İncelemeler", icon: <Play className="w-4 h-4" />, href: "/inceleme/video" }
+      { title: "Telefon", icon: <PhoneIcon className="w-4 h-4" />, href: "/kategori/Telefon" },
+      { title: "Bilgisayar", icon: <Laptop className="w-4 h-4" />, href: "/kategori/Bilgisayar" },
+      { title: "Tablet", icon: <Code className="w-4 h-4" />, href: "/kategori/tablet" },
+      { title: "Teknoloji", icon: <Headphones className="w-4 h-4" />, href: "/kategori/teknoloji" },
+      { title: "Yazılım", icon: <Play className="w-4 h-4" />, href: "/kategori/yazilim" }
     ]
   },
   karsilastirmalar: {
@@ -51,33 +41,7 @@ const MENU_STRUCTURE = {
   rehberler: {
     title: "Rehberler",
     icon: <BookOpen className="w-4 h-4" />,
-    submenu: [
-      { title: "Başlangıç Seviyesi", icon: <Settings className="w-4 h-4" />, href: "/rehber/baslangic" },
-      { title: "Uzman Rehberleri", icon: <Brain className="w-4 h-4" />, href: "/rehber/uzman" },
-      { title: "İpuçları & Hileler", icon: <Lightbulb className="w-4 h-4" />, href: "/rehber/ipuclari" }
-    ]
-  },
-  oyun: {
-    title: "Oyun Dünyası",
-    icon: <Gamepad2 className="w-4 h-4" />,
-    submenu: [
-      { title: "Oyun Haberleri", icon: <Newspaper className="w-4 h-4" />, href: "/oyun/haberler" },
-      { title: "Konsol Dünyası", icon: <Gamepad2 className="w-4 h-4" />, href: "/oyun/konsol" },
-      { title: "PC Oyunları", icon: <Monitor className="w-4 h-4" />, href: "/oyun/pc" },
-      { title: "Mobil Oyunlar", icon: <PhoneIcon className="w-4 h-4" />, href: "/oyun/mobil" },
-      { title: "E-Spor", icon: <Trophy className="w-4 h-4" />, href: "/oyun/espor" }
-    ]
-  },
-  gelecek: {
-    title: "Gelecek Teknolojiler",
-    icon: <Rocket className="w-4 h-4" />,
-    submenu: [
-      { title: "Yapay Zekâ", icon: <Brain className="w-4 h-4" />, href: "/gelecek/yapay-zeka" },
-      { title: "Blockchain & Kripto", icon: <Bitcoin className="w-4 h-4" />, href: "/gelecek/blockchain" },
-      { title: "Uzay Teknolojileri", icon: <Satellite className="w-4 h-4" />, href: "/gelecek/uzay" },
-      { title: "Kuantum Bilgisayar", icon: <Atom className="w-4 h-4" />, href: "/gelecek/kuantum" },
-      { title: "Biyoteknoloji", icon: <Dna className="w-4 h-4" />, href: "/gelecek/biyoteknoloji" }
-    ]
+    submenu: [] // submenu kaldırıldı
   }
 };
 
@@ -179,18 +143,33 @@ export default function Header() {
           {/* Ana Menü Öğeleri */}
           {Object.entries(MENU_STRUCTURE).map(([key, menu]) => (
             <div key={key} className="relative">
-              <button
-                onClick={() => handleMenuToggle(key)}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 font-medium ${
-                  openMenu === key 
-                    ? 'bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/50 dark:to-purple-950/50 text-primary' 
-                    : 'hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-950/50 dark:hover:to-purple-950/50 hover:text-primary'
-                }`}
-              >
-                {menu.icon}
-                {menu.title}
-                <ChevronDown size={16} className={`transition-transform duration-300 ${openMenu === key ? 'rotate-180' : ''}`} />
-              </button>
+              {key === "rehberler" ? (
+                <Link
+                  to="/rehberler"
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 font-medium ${
+                    openMenu === key 
+                      ? 'bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/50 dark:to-purple-950/50 text-primary' 
+                      : 'hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-950/50 dark:hover:to-purple-950/50 hover:text-primary'
+                  }`}
+                  onClick={() => setOpenMenu(null)}
+                >
+                  {menu.icon}
+                  {menu.title}
+                </Link>
+              ) : (
+                <button
+                  onClick={() => handleMenuToggle(key)}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 font-medium ${
+                    openMenu === key 
+                      ? 'bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/50 dark:to-purple-950/50 text-primary' 
+                      : 'hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-950/50 dark:hover:to-purple-950/50 hover:text-primary'
+                  }`}
+                >
+                  {menu.icon}
+                  {menu.title}
+                  <ChevronDown size={16} className={`transition-transform duration-300 ${openMenu === key ? 'rotate-180' : ''}`} />
+                </button>
+              )}
               
               {/* Dropdown Menu */}
               {openMenu === key && (
@@ -218,9 +197,10 @@ export default function Header() {
           ))}
         </nav>
 
-        {/* Search and Mobile Menu */}
+        {/* Search, Theme Toggle and Mobile Menu */}
         <div className="flex items-center gap-3">
           <SearchButton />
+          <ThemeToggle />
           <button
             className="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-950/50 dark:hover:to-purple-950/50 transition-all duration-300"
             onClick={() => setDrawer(true)}
@@ -238,7 +218,10 @@ export default function Header() {
           <div className="absolute left-0 top-0 h-full w-[86%] max-w-[360px] bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl p-6 shadow-2xl border-r border-white/20 dark:border-white/10 overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <Link to="/" className="font-black text-lg">TeknoBlogoji</Link>
-              <button onClick={() => setDrawer(false)} className="text-2xl leading-none hover:text-primary transition-colors">×</button>
+              <div className="flex items-center gap-2">
+                <ThemeToggle />
+                <button onClick={() => setDrawer(false)} className="text-2xl leading-none hover:text-primary transition-colors">×</button>
+              </div>
             </div>
             
             {/* Mobile Menu Items */}
@@ -249,18 +232,28 @@ export default function Header() {
                     {menu.icon}
                     {menu.title}
                   </div>
-                  <div className="ml-6 space-y-1">
-                    {menu.submenu.map((item, index) => (
-                      <Link
-                        key={index}
-                        to={item.href}
-                        className="block py-2 px-3 rounded-lg hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-950/50 dark:hover:to-purple-950/50 transition-all duration-300 text-sm"
-                        onClick={() => setDrawer(false)}
-                      >
-                        {item.title}
-                      </Link>
-                    ))}
-                  </div>
+                  {key === "rehberler" ? (
+                    <Link
+                      to="/rehberler"
+                      className="block py-2 px-3 rounded-lg hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-950/50 dark:hover:to-purple-950/50 transition-all duration-300 text-sm"
+                      onClick={() => setDrawer(false)}
+                    >
+                      {menu.title}
+                    </Link>
+                  ) : (
+                    <div className="ml-6 space-y-1">
+                      {menu.submenu.map((item, index) => (
+                        <Link
+                          key={index}
+                          to={item.href}
+                          className="block py-2 px-3 rounded-lg hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-950/50 dark:hover:to-purple-950/50 transition-all duration-300 text-sm"
+                          onClick={() => setDrawer(false)}
+                        >
+                          {item.title}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

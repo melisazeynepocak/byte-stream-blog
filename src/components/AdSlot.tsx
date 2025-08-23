@@ -3,9 +3,12 @@ import React, { useEffect, useRef, useState } from "react";
 interface AdSlotProps {
   slot: "top" | "inArticle" | "sidebar";
   className?: string;
+  visible?: boolean;
 }
 
-export const AdSlot: React.FC<AdSlotProps> = ({ slot, className }) => {
+export const AdSlot: React.FC<AdSlotProps> = ({ slot, className, visible = false }) => {
+  if (!visible) return null;
+
   const label =
     slot === "top"
       ? "Üst Banner Reklam Alanı"

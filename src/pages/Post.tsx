@@ -15,6 +15,7 @@ import { ShareButtons } from "@/components/blog/ShareButtons";
 import { SimilarPosts } from "@/components/blog/SimilarPosts";
 // types.ts içeriğine göre import (gerekirse yolu "@/types" yap)
 import type { Post as DbPost, Category } from "@/types";
+import { formatRelativeDateTR } from "@/lib/utils";
 
 /** Ekranda kullanacağımız normalize tip (DB tiplerinden türetilmiş) */
 type ViewPost = {
@@ -200,7 +201,7 @@ const PostPage = () => {
       />
 
       <main className="container py-6 md:py-10 relative">
-        <AdSlot slot="top" className="mb-6" />
+        <AdSlot slot="top" className="mb-6" visible={false} />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <article className="lg:col-span-8 max-w-3xl">
@@ -216,6 +217,12 @@ const PostPage = () => {
               <Link to={`/kategori/${post.category.slug}`} className="text-sm text-primary">
                 {post.category.name}
               </Link>
+              <span className="block text-xs text-muted-foreground mt-1 mb-1">
+                {formatRelativeDateTR(post.createdAt)}
+              </span>
+              <span className="block text-xs text-muted-foreground mb-1">
+                {(post.views ?? 0).toLocaleString()} görüntülenme
+              </span>
               <h1 className="text-3xl md:text-4xl font-extrabold mt-2">{post.title}</h1>
               {/* alt başlık zorunlu değil; istersen content'ten kısa bir özet kullan */}
               <p className="mt-2 text-lg text-muted-foreground">{post.content.slice(0, 140)}...</p>
@@ -246,7 +253,7 @@ const PostPage = () => {
                 <p>{post.content}</p>
               </div>
 
-              <AdSlot slot="inArticle" className="my-8" />
+              <AdSlot slot="inArticle" className="my-8" visible={false} />
 
               <div id="ozellikler">
                 <h2>Temel Özellikler</h2>
@@ -259,7 +266,7 @@ const PostPage = () => {
                 <p>Kamera performansı ve görüntü kalitesi...</p>
               </div>
 
-              <AdSlot slot="inArticle" className="my-8" />
+              <AdSlot slot="inArticle" className="my-8" visible={false} />
 
               <div id="sonuc">
                 <h2>Sonuç ve Değerlendirme</h2>

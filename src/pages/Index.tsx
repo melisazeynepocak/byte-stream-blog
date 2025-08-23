@@ -137,14 +137,13 @@ const Index = () => {
         {!q && (
           <div className="space-y-6">
             {featured.length > 0 && <FeaturedSlider posts={featured.slice(0, 6)} />}
-            <TrendingTags />
             <FeaturedReview />
             <PopularGuides />
-            <AdSlot slot="top" />
+            <AdSlot slot="top" visible={false} />
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mt-12">
           <section className="lg:col-span-8 space-y-6">
             {loading ? (
               <div>Yükleniyor...</div>
@@ -170,7 +169,7 @@ const Index = () => {
             )}
           </section>
 
-          <aside className="lg:col-span-4">
+          <aside className="lg:col-span-4 sticky top-24 h-fit">
             <Sidebar />
           </aside>
         </div>

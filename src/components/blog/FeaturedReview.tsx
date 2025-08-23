@@ -90,7 +90,7 @@ export function FeaturedReview() {
             <img
               src={post.cover_image || "/placeholder.svg"}
               alt={`${post.title} kapak görseli`}
-              className="w-full h-48 object-cover"
+              className="w-full h-72 object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-4">
