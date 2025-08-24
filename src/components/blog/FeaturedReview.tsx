@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 
 interface FeaturedReviewPost {
@@ -82,7 +81,7 @@ export function FeaturedReview() {
   return (
     <section className="w-full">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold">Öne Çıkan İnceleme</h2>
+        <h2 className="text-2xl font-bold">Öne Çıkan İnceleme</h2>
       </div>
       <Card className="overflow-hidden">
         <Link to={`/${post.categories.slug}/${post.slug}`}>
@@ -94,10 +93,10 @@ export function FeaturedReview() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-4">
-              <Badge variant="secondary" className="mb-2">
+              <span className="inline-block text-xs px-2 py-1 rounded-md bg-primary text-primary-foreground mb-2">
                 {post.categories.name}
-              </Badge>
-              <h3 className="text-xl font-black text-white drop-shadow-lg">
+              </span>
+              <h3 className="mt-2 text-lg md:text-xl font-bold leading-tight line-clamp-2">
                 {post.title}
               </h3>
             </div>

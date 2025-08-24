@@ -19,7 +19,7 @@ type Featured = { id: string; title: string; slug: string; cover_image: string |
 // Yeni menü yapısı
 const MENU_STRUCTURE = {
   Kategoriler: {
-    title: "Kategoriler test",
+    title: "Kategoriler",
     icon: <Monitor className="w-4 h-4" />,
     submenu: [
       { title: "Telefon", icon: <PhoneIcon className="w-4 h-4" />, href: "/kategori/Telefon" },
