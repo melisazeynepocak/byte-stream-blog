@@ -127,6 +127,34 @@ function seedPosts(): Post[] {
       views: 742,
       featured: true,
     },
+    {
+      id: crypto.randomUUID(),
+      title: "Android Telefonunuzu Hızlandırmanın 10 Yolu",
+      subtitle: "Performans optimizasyonu ve temizlik rehberi",
+      slug: slugify("Android Telefonunuzu Hızlandırmanın 10 Yolu"),
+      category: CATEGORIES[0],
+      tags: ["android", "telefon", "performans", "rehber", "optimizasyon"],
+      cover: phoneImg,
+      content:
+        "Android telefonunuzun yavaşladığını mı hissediyorsunuz? Bu rehberde telefonunuzu hızlandıracak 10 pratik yöntemi öğreneceksiniz. Gereksiz uygulamaları kaldırmaktan RAM temizliğine kadar tüm adımlar detaylı olarak açıklanıyor.",
+      createdAt: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 7).toISOString(),
+      views: 456,
+      featured: false,
+    },
+    {
+      id: crypto.randomUUID(),
+      title: "Windows 11'de Gizli Özellikleri Aktif Etme",
+      subtitle: "Kayıt defteri ve grup ilkesi ayarları",
+      slug: slugify("Windows 11'de Gizli Özellikleri Aktif Etme"),
+      category: CATEGORIES[1],
+      tags: ["windows", "bilgisayar", "rehber", "gizli özellik", "kayıt defteri"],
+      cover: laptopImg,
+      content:
+        "Windows 11'de varsayılan olarak gizli olan özellikleri nasıl aktif edeceğinizi öğrenin. Kayıt defteri düzenlemeleri, grup ilkesi ayarları ve güvenli yöntemlerle sisteminizi özelleştirin.",
+      createdAt: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 14).toISOString(),
+      views: 298,
+      featured: false,
+    },
   ];
   return base;
 }

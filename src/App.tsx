@@ -26,6 +26,8 @@ import Cookies from "@/pages/Cookies";
 import EditorialPolicy from "@/pages/EditorialPolicy";
 import AdsDisclosure from "@/pages/AdsDisclosure";
 import TagPage from "@/pages/Tag";
+import RehberlerPage from "@/pages/Rehberler";
+import AdminRehberEditor from "@/pages/AdminRehberEditor";
 import { CookieBanner } from "@/components/CookieBanner";
 
 const queryClient = new QueryClient();
@@ -84,6 +86,17 @@ const App = () => (
             <Route path="/editorial-politika" element={<EditorialPolicy />} />
             <Route path="/reklam-affiliate" element={<AdsDisclosure />} />
             <Route path="/etiket/:tag" element={<TagPage />} />
+            <Route path="/rehberler" element={<RehberlerPage />} />
+            <Route path="/admin/rehber/new" element={
+              <ProtectedAdminRoute>
+                <AdminRehberEditor />
+              </ProtectedAdminRoute>
+            } />
+            <Route path="/admin/rehber/edit/:rehberId" element={
+              <ProtectedAdminRoute>
+                <AdminRehberEditor />
+              </ProtectedAdminRoute>
+            } />
             <Route path="/kategori/:categorySlug" element={<CategoryPage />} />
             <Route path="/:categorySlug/:postSlug" element={<PostPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
