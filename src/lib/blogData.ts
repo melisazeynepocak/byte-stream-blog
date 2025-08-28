@@ -3,7 +3,7 @@ import phoneImg from "@/assets/post-phone.jpg";
 import laptopImg from "@/assets/post-laptop.jpg";
 import softwareImg from "@/assets/post-software.jpg";
 
-export type CategorySlug = "telefonlar" | "bilgisayarlar" | "yazilim-uygulamalar" | "teknoloji-haberleri";
+export type CategorySlug = "telefonlar" | "bilgisayarlar" | "yazilim-uygulamalar" | "yapay-zeka";
 
 export interface Post {
   id: string;
@@ -31,7 +31,7 @@ export const CATEGORIES: { slug: CategorySlug; name: string }[] = [
   { slug: "telefonlar", name: "Telefonlar" },
   { slug: "bilgisayarlar", name: "Bilgisayarlar" },
   { slug: "yazilim-uygulamalar", name: "Yazılım & Uygulamalar" },
-  { slug: "teknoloji-haberleri", name: "Teknoloji Haberleri" },
+  { slug: "yapay-zeka", name: "Yapay Zeka" },
 ];
 
 const STORAGE_KEYS = {
@@ -115,14 +115,14 @@ function seedPosts(): Post[] {
     },
     {
       id: crypto.randomUUID(),
-      title: "Haftanın Teknoloji Haberleri: Yapay Zeka ve Daha Fazlası",
+      title: "Haftanın Yapay Zeka Haberleri: Teknoloji ve Daha Fazlası",
       subtitle: "Kısa kısa: sektörde neler oldu?",
-      slug: slugify("Haftanın Teknoloji Haberleri Yapay Zeka ve Daha Fazlası"),
+      slug: slugify("Haftanın Yapay Zeka Haberleri Teknoloji ve Daha Fazlası"),
       category: CATEGORIES[3],
       tags: ["haber", "yapay zeka", "trend"],
       cover: heroImg,
       content:
-        "Bu hafta teknoloji dünyasında dikkat çeken gelişmeleri bir araya getirdik. Yeni çip mimarileri, yapay zeka regülasyonları ve daha fazlası.",
+        "Bu hafta yapay zeka dünyasında dikkat çeken gelişmeleri bir araya getirdik. Yeni çip mimarileri, yapay zeka regülasyonları ve daha fazlası.",
       createdAt: new Date(now.getTime() - 1000 * 60 * 60 * 3).toISOString(),
       views: 742,
       featured: true,

@@ -9,7 +9,7 @@ import {
   Bot, Shield, Gamepad2, Newspaper, Search, Menu,
   Clock, Globe, Building, Calendar, Monitor, Code, Settings,
   Smartphone as PhoneIcon, Laptop, Headphones, Play, 
-  BarChart3, BookOpen, Lightbulb, Rocket, Brain, Bitcoin,
+  BookOpen, Lightbulb, Rocket, Brain, Bitcoin,
   Satellite, Atom, Dna, Trophy
 } from "lucide-react";
 
@@ -24,19 +24,8 @@ const MENU_STRUCTURE = {
     submenu: [
       { title: "Telefon", icon: <PhoneIcon className="w-4 h-4" />, href: "/kategori/Telefon" },
       { title: "Bilgisayar", icon: <Laptop className="w-4 h-4" />, href: "/kategori/Bilgisayar" },
-      { title: "Tablet", icon: <Code className="w-4 h-4" />, href: "/kategori/tablet" },
-      { title: "Teknoloji", icon: <Headphones className="w-4 h-4" />, href: "/kategori/teknoloji" },
+      { title: "Yapay Zeka", icon: <Headphones className="w-4 h-4" />, href: "/kategori/yapay-zeka" },
       { title: "Yazılım", icon: <Play className="w-4 h-4" />, href: "/kategori/yazilim" }
-    ]
-  },
-  karsilastirmalar: {
-    title: "Karşılaştırmalar",
-    icon: <BarChart3 className="w-4 h-4" />,
-    submenu: [
-      { title: "Telefon Karşılaştırmaları", icon: <PhoneIcon className="w-4 h-4" />, href: "/karsilastirma/telefon" },
-      { title: "Laptop Karşılaştırmaları", icon: <Laptop className="w-4 h-4" />, href: "/karsilastirma/laptop" },
-      { title: "Yazılım Karşılaştırmaları", icon: <Code className="w-4 h-4" />, href: "/karsilastirma/yazilim" },
-      { title: "Tablo Görünümü", icon: <BarChart3 className="w-4 h-4" />, href: "/karsilastirma/tablo" }
     ]
   },
   rehberler: {
@@ -49,14 +38,11 @@ const MENU_STRUCTURE = {
 const GROUP_MAP: Record<string, "devices" | "software" | "market" | "other"> = {
   telefonlar: "devices",
   bilgisayarlar: "devices",
-  tablet: "devices",
   "yapay-zeka": "software",
   yazilim: "software",
   "internet-guvenlik": "software",
   oyun: "software",
   donanim: "market",
-  teknoloji: "market",
-  "teknoloji-haberleri": "market",
   rehber: "software",
 };
 
