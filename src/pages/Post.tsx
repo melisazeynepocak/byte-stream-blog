@@ -42,6 +42,42 @@ const slugifyTr = (s?: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
+// Yardımcı: İçeriği biçimlendir
+function renderFormattedContent(content: string) {
+  if (!content) return null;
+  // Satırları ayır
+  const lines = content.split(/\r?\n/).filter(l => l.trim() !== "");
+  const elements: React.ReactNode[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    // 1., 2., 3. gibi başlık satırı mı?
+    const match = line.match(/^(\d+)\.(.*)$/);
+    if (match) {
+      // Başlık
+      elements.push(
+        <div key={i} style={{lineHeight:1.6, marginBottom:12}}>
+          <strong style={{fontWeight:700}}>{match[0]}</strong>
+        </div>
+      );
+      // Sonraki satır açıklama ise ekle
+      if (lines[i+1] && !lines[i+1].match(/^(\d+)\./)) {
+        elements.push(
+          <p key={i+"-desc"} style={{lineHeight:1.6, marginBottom:12}}>{lines[i+1]}</p>
+        );
+        i++;
+      }
+    } else {
+      // Normal paragraf veya açıklama
+      elements.push(
+        <p key={i} style={{lineHeight:1.6, marginBottom:12}}>{line}</p>
+      );
+    }
+    i++;
+  }
+  return elements;
+}
+
 const PostPage = () => {
   const { categorySlug, postSlug } = useParams();
   const [post, setPost] = useState<ViewPost | null>(null);
@@ -245,33 +281,16 @@ const PostPage = () => {
               decoding="async"
             />
 
-            <TableOfContents content={post.content} />
-
             <section className="prose prose-neutral max-w-none dark:prose-invert">
-              <div id="giris">
-                <h2>Giriş</h2>
-                <p>{post.content}</p>
-              </div>
+              {renderFormattedContent(post.content)}
 
               <AdSlot slot="inArticle" className="my-8" visible={false} />
 
-              <div id="ozellikler">
-                <h2>Temel Özellikler</h2>
-                <p>Bu bölümde ürünün temel özelliklerini inceleyeceğiz...</p>
 
-                <h3 id="performans">Performans Analizi</h3>
-                <p>Performans testlerinde dikkat çeken sonuçlar...</p>
-
-                <h3 id="kamera">Kamera Kalitesi</h3>
-                <p>Kamera performansı ve görüntü kalitesi...</p>
-              </div>
 
               <AdSlot slot="inArticle" className="my-8" visible={false} />
 
-              <div id="sonuc">
-                <h2>Sonuç ve Değerlendirme</h2>
-                <p>Genel değerlendirme ve öneriler...</p>
-              </div>
+
             </section>
 
             <SimilarPosts posts={related as any} currentPostId={String(post.id)} />
