@@ -86,11 +86,11 @@ export function FeaturedReview() {
       <Card className="overflow-hidden">
         <Link to={`/${post.categories.slug}/${post.slug}`}>
           <div className="relative">
-            <img
-              src={post.cover_image || "/placeholder.svg"}
-              alt={`${post.title} kapak görseli`}
-              className="w-full h-72 object-cover"
-            />
+          <img
+    src={post.cover_image || "/placeholder.svg"}
+    alt={`${post.title} kapak görseli`}
+    className="w-full h-72 object-cover"
+  />
             <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-4">
               <span className="inline-block text-xs px-2 py-1 rounded-md bg-primary text-primary-foreground mb-2">

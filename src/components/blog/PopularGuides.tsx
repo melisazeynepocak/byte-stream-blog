@@ -164,7 +164,7 @@ export function PopularGuides() {
                 <img
                   src={post.cover_image || "/placeholder.svg"}
                   alt={`${post.title} kapak görseli`}
-                  className="w-full h-32 object-cover"
+                  className="w-full h-72 object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/10 to-transparent" />
                 <div className="absolute top-2 left-2">

@@ -13,6 +13,7 @@ import { PostMeta } from "@/components/blog/PostMeta";
 import { TableOfContents } from "@/components/blog/TableOfContents";
 import { ShareButtons } from "@/components/blog/ShareButtons";
 import { SimilarPosts } from "@/components/blog/SimilarPosts";
+import { Sidebar } from "@/components/blog/Sidebar";
 // types.ts içeriğine göre import (gerekirse yolu "@/types" yap)
 import type { Post as DbPost, Category } from "@/types";
 import { formatRelativeDateTR } from "@/lib/utils";
@@ -29,6 +30,7 @@ type ViewPost = {
   category: { name: string; slug: string };
   views: number;
   images: PostImage[];
+  excerpt?: string | null;
 };
 
 type PostImage = {
@@ -213,6 +215,7 @@ const PostPage = () => {
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [comments, setComments] = useState<any[]>([]);
+  const [categoryMostRead, setCategoryMostRead] = useState<any[]>([]);
 
   useEffect(() => {
     let ignore = false;
@@ -225,7 +228,7 @@ const PostPage = () => {
         .from("posts")
         .select(
           `
-          id, title, slug, content, cover_image, created_at, views, tags,
+          id, title, slug, content, excerpt, cover_image, created_at, views, tags,
           categories:categories!posts_category_id_fkey ( id, name, slug )
         `
         )
@@ -237,13 +240,8 @@ const PostPage = () => {
         return;
       }
 
-      const d = data as DbPost & {
-        categories?: Pick<Category, "id" | "name" | "slug"> | null;
-        views?: number;
-        tags?: string[] | null;
-        cover_image?: string | null;
-        slug: string;
-      };
+      // const d = data as any;
+      const d = data as any;
 
       // Post images'ları getir
       const { data: imagesData, error: imagesError } = await supabase
@@ -261,6 +259,7 @@ const PostPage = () => {
         d.categories?.slug ??
         (categoryName ? slugifyTr(categoryName) : (categorySlug as string));
 
+      // excerpt'i normalize et
       const normalized: ViewPost = {
         id: d.id,
         title: d.title,
@@ -272,6 +271,7 @@ const PostPage = () => {
         category: { name: categoryName || catSlug, slug: catSlug },
         views: d.views ?? 0,
         images: imagesData || [],
+        excerpt: d.excerpt ?? "",
       };
 
       setPost(normalized);
@@ -314,6 +314,19 @@ const PostPage = () => {
             p.category.slug === normalized.category.slug
         )
       );
+
+      // Kategoriye göre en çok okunanlar (benzer yazılar için)
+      const { data: mostRead } = await supabase
+        .from("posts")
+        .select(
+          `id, title, slug, cover_image, views, categories:categories!posts_category_id_fkey (slug, name)`
+        )
+        .eq("status", "published")
+        .eq("categories.slug", normalized.category.slug)
+        .neq("id", d.id)
+        .order("views", { ascending: false })
+        .limit(3);
+      setCategoryMostRead(mostRead || []);
     })();
 
     return () => {
@@ -401,9 +414,13 @@ const PostPage = () => {
               </span>
               <h1 className="text-3xl md:text-4xl font-extrabold mt-2">{post.title}</h1>
               {/* alt başlık zorunlu değil; istersen content'ten kısa bir özet kullan */}
-              <p className="mt-2 text-lg text-muted-foreground">{post.content.slice(0, 140)}...</p>
+              <p className="mt-2 text-lg text-muted-foreground">
+                {post.excerpt && post.excerpt.trim().length > 0
+                  ? post.excerpt
+                  : post.content.slice(0, 140) + "..."}
+              </p>
 
-              <PostMeta author="TeknoBlog Editörü" publishedAt={post.createdAt} readingTime={readingTime} />
+              <PostMeta author="Melisa Zeynep Ocak" publishedAt={post.createdAt} readingTime={readingTime} />
 
               <div className="mt-4 flex flex-wrap gap-2">
                 {post.tags.map((t) => (
@@ -433,8 +450,35 @@ const PostPage = () => {
 
             </section>
 
-            <SimilarPosts posts={related as any} currentPostId={String(post.id)} />
+            {/* Benzer Yazılar alanı */}
+            {categoryMostRead.length > 0 && (
+              <section className="mt-12 border-t pt-8">
+                <h2 className="text-xl font-bold mb-6">Benzer Yazılar</h2>
+                <div className="grid md:grid-cols-3 gap-6">
+                  {categoryMostRead.map((p) => (
+                    <article key={p.id} className="group">
+                      <Link to={`/${p.categories?.slug || 'genel'}/${p.slug}`} className="block">
+                        <img
+                          src={p.cover_image || "/placeholder.svg"}
+                          alt={p.title + " görseli"}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-32 object-cover rounded-lg group-hover:scale-[1.02] transition-transform"
+                        />
+                        <div className="mt-3">
+                          <span className="text-xs text-primary">{p.categories?.name}</span>
+                          <h3 className="mt-1 font-semibold leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                            {p.title}
+                          </h3>
+                        </div>
+                      </Link>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            )}
 
+            {/* Yorumlar alanı */}
             <section id="comments" className="mt-12 border-t pt-8">
               <h3 className="font-semibold text-lg mb-3">Yorumlar</h3>
               <form
@@ -472,7 +516,7 @@ const PostPage = () => {
 
           <aside className="lg:col-span-4">
             <div className="sticky top-24">
-              <ShareButtons url={url} title={post.title} className="hidden lg:block mb-6" />
+              <Sidebar />
             </div>
           </aside>
         </div>
