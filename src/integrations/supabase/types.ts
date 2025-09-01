@@ -206,34 +206,37 @@ export type Database = {
           }
         ]
       }
-      popular_guides: {
+      post_images: {
         Row: {
           id: string
-          mode: string
-          post_id: string | null
-          position: number | null
-          created_by: string
+          post_id: string
+          image_url: string
+          alt_text: string | null
+          caption: string | null
+          position: number
           created_at: string
         }
         Insert: {
           id?: string
-          mode: string
-          post_id?: string | null
-          position?: number | null
-          created_by: string
+          post_id: string
+          image_url: string
+          alt_text?: string | null
+          caption?: string | null
+          position?: number
           created_at?: string
         }
         Update: {
           id?: string
-          mode?: string
-          post_id?: string | null
-          position?: number | null
-          created_by?: string
+          post_id?: string
+          image_url?: string
+          alt_text?: string | null
+          caption?: string | null
+          position?: number
           created_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: null
+            foreignKeyName: "post_images_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "posts"

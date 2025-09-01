@@ -28,6 +28,15 @@ type ViewPost = {
   tags: string[]; // yoksa boş dizi
   category: { name: string; slug: string };
   views: number;
+  images: PostImage[];
+};
+
+type PostImage = {
+  id: string;
+  image_url: string;
+  alt_text?: string;
+  caption?: string;
+  position: number;
 };
 
 const slugifyTr = (s?: string) =>
@@ -43,38 +52,157 @@ const slugifyTr = (s?: string) =>
     .replace(/^-+|-+$/g, "");
 
 // Yardımcı: İçeriği biçimlendir
-function renderFormattedContent(content: string) {
+// Yardımcı: İçeriği biçimlendir
+function renderFormattedContent(content: string, images: PostImage[] = []) {
   if (!content) return null;
   // Satırları ayır
   const lines = content.split(/\r?\n/).filter(l => l.trim() !== "");
   const elements: React.ReactNode[] = [];
   let i = 0;
+  let imageIndex = 0;
+  
   while (i < lines.length) {
     const line = lines[i];
-    // 1., 2., 3. gibi başlık satırı mı?
-    const match = line.match(/^(\d+)\.(.*)$/);
-    if (match) {
-      // Başlık
+    
+    // Markdown başlık formatları
+    const h1Match = line.match(/^# (.+)$/);
+    const h2Match = line.match(/^## (.+)$/);
+    const h3Match = line.match(/^### (.+)$/);
+    const h4Match = line.match(/^#### (.+)$/);
+    const h5Match = line.match(/^##### (.+)$/);
+    const h6Match = line.match(/^###### (.+)$/);
+    
+    // Sayılı liste formatı (mevcut)
+    const numberedMatch = line.match(/^(\d+)\.(.+)$/);
+    
+    // Tire ile liste formatı
+    const bulletMatch = line.match(/^- (.+)$/);
+    
+    // Yıldız ile liste formatı
+    const starMatch = line.match(/^\* (.+)$/);
+    
+    if (h1Match) {
+      // H1 Başlık - sadece metin görünür, # işareti gizlenir
       elements.push(
-        <div key={i} style={{lineHeight:1.6, marginBottom:12}}>
-          <strong style={{fontWeight:700}}>{match[0]}</strong>
+        <h1 key={i} className="text-3xl font-bold mt-8 mb-4 text-foreground">
+          {h1Match[1]}
+        </h1>
+      );
+    } else if (h2Match) {
+      // H2 Başlık - sadece metin görünür, ## işaretleri gizlenir
+      elements.push(
+        <h2 key={i} className="text-2xl font-bold mt-6 mb-3 text-foreground">
+          {h2Match[1]}
+        </h2>
+      );
+    } else if (h3Match) {
+      // H3 Başlık - sadece metin görünür, ### işaretleri gizlenir
+      elements.push(
+        <h3 key={i} className="text-xl font-bold mt-5 mb-2 text-foreground">
+          {h3Match[1]}
+        </h3>
+      );
+    } else if (h4Match) {
+      // H4 Başlık
+      elements.push(
+        <h4 key={i} className="text-lg font-bold mt-4 mb-2 text-foreground">
+          {h4Match[1]}
+        </h4>
+      );
+    } else if (h5Match) {
+      // H5 Başlık
+      elements.push(
+        <h5 key={i} className="text-base font-bold mt-3 mb-1 text-foreground">
+          {h5Match[1]}
+        </h5>
+      );
+    } else if (h6Match) {
+      // H6 Başlık
+      elements.push(
+        <h6 key={i} className="text-sm font-bold mt-2 mb-1 text-foreground">
+          {h6Match[1]}
+        </h6>
+      );
+    } else if (numberedMatch) {
+      // Sayılı liste (mevcut format)
+      elements.push(
+        <div key={i} className="font-bold text-lg mt-4 mb-2 text-foreground">
+          {numberedMatch[0]}
         </div>
       );
       // Sonraki satır açıklama ise ekle
-      if (lines[i+1] && !lines[i+1].match(/^(\d+)\./)) {
+      if (lines[i+1] && !lines[i+1].match(/^(\d+)\.|^#|^-|^\*/)) {
         elements.push(
-          <p key={i+"-desc"} style={{lineHeight:1.6, marginBottom:12}}>{lines[i+1]}</p>
+          <p key={i+"-desc"} className="mb-3 text-muted-foreground">{lines[i+1]}</p>
         );
         i++;
       }
-    } else {
-      // Normal paragraf veya açıklama
+    } else if (bulletMatch) {
+      // Tire ile liste - sadece metin görünür, - işareti gizlenir
       elements.push(
-        <p key={i} style={{lineHeight:1.6, marginBottom:12}}>{line}</p>
+        <div key={i} className="font-bold text-lg mt-4 mb-2 text-foreground">
+          {bulletMatch[1]}
+        </div>
+      );
+    } else if (starMatch) {
+      // Yıldız ile liste - sadece metin görünür, * işareti gizlenir
+      elements.push(
+        <div key={i} className="font-bold text-lg mt-4 mb-2 text-foreground">
+          {starMatch[1]}
+        </div>
+      );
+    } else {
+      // Normal paragraf
+      elements.push(
+        <p key={i} className="mb-3 leading-relaxed">{line}</p>
       );
     }
+    
+    // Eğer bu başlıktan sonra resim varsa ekle
+    if ((h1Match || h2Match || h3Match || h4Match || h5Match || h6Match || numberedMatch || bulletMatch || starMatch) && images[imageIndex]) {
+      const image = images[imageIndex];
+      elements.push(
+        <div key={`image-${imageIndex}`} className="my-6">
+          <img
+            src={image.image_url}
+            alt={image.alt_text || "İçerik görseli"}
+            className="w-full rounded-lg shadow-md"
+            loading="lazy"
+          />
+          {image.caption && (
+            <p className="text-sm text-muted-foreground mt-2 text-center italic">
+              {image.caption}
+            </p>
+          )}
+        </div>
+      );
+      imageIndex++;
+    }
+    
     i++;
   }
+  
+  // Kalan resimleri sona ekle
+  while (imageIndex < images.length) {
+    const image = images[imageIndex];
+    elements.push(
+      <div key={`image-${imageIndex}`} className="my-6">
+        <img
+          src={image.image_url}
+          alt={image.alt_text || "İçerik görseli"}
+          className="w-full rounded-lg shadow-md"
+          loading="lazy"
+        />
+        {image.caption && (
+          <p className="text-sm text-muted-foreground mt-2 text-center italic">
+            {image.caption}
+          </p>
+        )}
+      </div>
+    );
+    imageIndex++;
+  }
+  
   return elements;
 }
 
@@ -117,6 +245,17 @@ const PostPage = () => {
         slug: string;
       };
 
+      // Post images'ları getir
+      const { data: imagesData, error: imagesError } = await supabase
+        .from('post_images')
+        .select('*')
+        .eq('post_id', d.id)
+        .order('position');
+
+      if (imagesError && !ignore) {
+        console.error('Post images fetch error:', imagesError);
+      }
+
       const categoryName = d.categories?.name ?? "";
       const catSlug =
         d.categories?.slug ??
@@ -132,6 +271,7 @@ const PostPage = () => {
         tags: Array.isArray(d.tags) ? d.tags : [],
         category: { name: categoryName || catSlug, slug: catSlug },
         views: d.views ?? 0,
+        images: imagesData || [],
       };
 
       setPost(normalized);
@@ -282,7 +422,7 @@ const PostPage = () => {
             />
 
             <section className="prose prose-neutral max-w-none dark:prose-invert">
-              {renderFormattedContent(post.content)}
+              {renderFormattedContent(post.content, post.images)}
 
               <AdSlot slot="inArticle" className="my-8" visible={false} />
 
@@ -328,10 +468,6 @@ const PostPage = () => {
               </ul>
             </section>
 
-            <section className="mt-10">
-              <h3 className="font-semibold mb-2">Kaynakça</h3>
-              <p className="text-sm text-muted-foreground">—</p>
-            </section>
           </article>
 
           <aside className="lg:col-span-4">
