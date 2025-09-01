@@ -160,8 +160,8 @@ function renderFormattedContent(content: string, images: PostImage[] = []) {
       );
     }
     
-    // Eğer bu başlıktan sonra resim varsa ekle
-    if ((h1Match || h2Match || h3Match || h4Match || h5Match || h6Match || numberedMatch || bulletMatch || starMatch) && images[imageIndex]) {
+    // Eğer bu başlıktan sonra resim varsa ekle (sadece ## ile başlayan başlıklar için)
+    if (h2Match && images[imageIndex]) {
       const image = images[imageIndex];
       elements.push(
         <div key={`image-${imageIndex}`} className="my-6">
@@ -233,6 +233,7 @@ const PostPage = () => {
         `
         )
         .eq("slug", postSlug)
+        .eq("status", "published")
         .single();
 
       if (error || !data || ignore) {
@@ -291,6 +292,7 @@ const PostPage = () => {
           categories:categories!posts_category_id_fkey ( slug, name )
         `
         )
+        .eq("status", "published")
         .neq("id", d.id)
         .limit(6);
 
@@ -328,6 +330,9 @@ const PostPage = () => {
         .limit(3);
       setCategoryMostRead(mostRead || []);
     })();
+
+    // Sayfa yüklendiğinde en üste scroll et
+    window.scrollTo(0, 0);
 
     return () => {
       ignore = true;

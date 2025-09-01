@@ -30,7 +30,7 @@ export const Sidebar = () => {
           {most.map((p) => (
             <li key={p.id} className="flex gap-3">
               <Link to={`/${p.categories?.slug || 'genel'}/${p.slug}`} className="shrink-0">
-                <img src={p.cover_image || "/placeholder.svg"} alt="" className="w-20 h-16 rounded object-cover" />
+                <img src={p.cover_image || "/placeholder.svg"} alt="" className="w-44 h-32 rounded object-cover" />
               </Link>
               <div>
                 <Link to={`/${p.categories?.slug || 'genel'}/${p.slug}`} className="font-medium leading-snug hover:underline">
