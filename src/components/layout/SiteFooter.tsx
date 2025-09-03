@@ -9,7 +9,7 @@ export const SiteFooter = () => {
           <a href="/gizlilik-politikasi" className="hover:underline">Gizlilik Politikası</a>
           <a href="/cerez-politikasi" className="hover:underline">Çerez Politikası</a>
           <a href="/editorial-politika" className="hover:underline">Editoryal Politika</a>
-          <a href="/reklam-affiliate" className="hover:underline">Reklam/Affiliate test</a>
+          <a href="/reklam-affiliate" className="hover:underline">Reklam/Affiliate</a>
         </nav>
       </div>
     </footer>
