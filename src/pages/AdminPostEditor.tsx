@@ -9,9 +9,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Seo } from "@/components/Seo";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Upload, X, Image, Plus, GripVertical } from "lucide-react";
+import { ArrowLeft, Upload, X, Image, Plus, GripVertical, Eye, Edit3 } from "lucide-react";
+import MDEditor from '@uiw/react-md-editor';
 
 interface Category {
   id: string;
@@ -521,14 +523,68 @@ export default function AdminPostEditor() {
                           {imageUploading ? "Yükleniyor..." : "İçerik Resmi Ekle"}
                         </Label>
                       </div>
-                      <Textarea
-                        id="content"
-                        value={formData.content}
-                        onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                        rows={12}
-                        required
-                        placeholder="Yazınızın içeriğini buraya yazın..."
-                      />
+                      
+                      <Tabs defaultValue="edit" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                          <TabsTrigger value="edit" className="flex items-center gap-2">
+                            <Edit3 className="w-4 h-4" />
+                            Düzenle
+                          </TabsTrigger>
+                          <TabsTrigger value="preview" className="flex items-center gap-2">
+                            <Eye className="w-4 h-4" />
+                            Önizleme
+                          </TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="edit" className="mt-4">
+                          <div className="border rounded-md">
+                            <MDEditor
+                              value={formData.content}
+                              onChange={(value) => setFormData(prev => ({ ...prev, content: value || "" }))}
+                              data-color-mode="light"
+                              height={400}
+                              visibleDragBar={false}
+                              textareaProps={{
+                                placeholder: `Yazınızın içeriğini buraya yazın... Markdown formatını kullanabilirsiniz.
+
+Örnek kullanım:
+# Ana Başlık
+## Alt Başlık
+### Küçük Başlık
+
+**Kalın yazı** ve *italik yazı*
+
+- Madde 1
+- Madde 2
+- Madde 3
+
+1. Sayılı liste 1
+2. Sayılı liste 2
+3. Sayılı liste 3
+
+> Alıntı metni
+
+\`\`\`javascript
+// Kod bloğu
+const örnek = "kod";
+\`\`\``,
+                              }}
+                              toolbarHeight={50}
+                              preview="edit"
+                            />
+                          </div>
+                        </TabsContent>
+                        <TabsContent value="preview" className="mt-4">
+                          <div className="border rounded-md p-4 min-h-[400px] bg-white">
+                            <MDEditor.Markdown 
+                              source={formData.content} 
+                              style={{ 
+                                whiteSpace: 'pre-wrap',
+                                backgroundColor: 'transparent'
+                              }}
+                            />
+                          </div>
+                        </TabsContent>
+                      </Tabs>
                     </div>
                   </div>
 
