@@ -3,6 +3,9 @@
     "api/sitemap.xml.ts": {
       "maxDuration": 30
     },
+    "api/sitemap-simple.ts": {
+      "maxDuration": 10
+    },
     "api/regenerate-sitemap.ts": {
       "maxDuration": 10
     }
