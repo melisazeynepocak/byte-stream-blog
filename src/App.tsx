@@ -27,6 +27,7 @@ import EditorialPolicy from "@/pages/EditorialPolicy";
 import AdsDisclosure from "@/pages/AdsDisclosure";
 import TagPage from "@/pages/Tag";
 import RehberlerPage from "@/pages/Rehberler";
+import SitemapGenerator from "@/pages/SitemapGenerator";
 import AdminRehberEditor from "@/pages/AdminRehberEditor";
 import { CookieBanner } from "@/components/CookieBanner";
 
@@ -87,6 +88,7 @@ const App = () => (
             <Route path="/reklam-affiliate" element={<AdsDisclosure />} />
             <Route path="/etiket/:tag" element={<TagPage />} />
             <Route path="/rehberler" element={<RehberlerPage />} />
+            <Route path="/sitemap-generator" element={<SitemapGenerator />} />
             <Route path="/admin/rehber/new" element={
               <ProtectedAdminRoute>
                 <AdminRehberEditor />
