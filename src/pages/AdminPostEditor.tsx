@@ -14,6 +14,7 @@ import { Seo } from "@/components/Seo";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Upload, X, Image, Plus, GripVertical, Eye, Edit3 } from "lucide-react";
 import MDEditor from '@uiw/react-md-editor';
+import { createSlug } from '@/lib/slug';
 
 interface Category {
   id: string;
@@ -138,20 +139,7 @@ export default function AdminPostEditor() {
     }
   };
 
-  const createSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .replace(/ğ/g, 'g')
-      .replace(/ü/g, 'u')
-      .replace(/ş/g, 's')
-      .replace(/ı/g, 'i')
-      .replace(/ö/g, 'o')
-      .replace(/ç/g, 'c')
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  };
+  // createSlug fonksiyonu artık @/lib/slug'dan import ediliyor
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -542,7 +530,7 @@ export default function AdminPostEditor() {
                               onChange={(value) => setFormData(prev => ({ ...prev, content: value || "" }))}
                               data-color-mode="light"
                               height={400}
-                              visibleDragBar={false}
+                              visibleDragbar={false}
                               textareaProps={{
                                 placeholder: `Yazınızın içeriğini buraya yazın... Markdown formatını kullanabilirsiniz.
 

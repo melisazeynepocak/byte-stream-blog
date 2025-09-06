@@ -5,6 +5,8 @@ import { Seo } from "@/components/Seo";
 import { Badge } from "@/components/ui/badge";
 import { PostCard } from "@/components/blog/PostCard";
 import { Sidebar } from "@/components/blog/Sidebar";
+import { cleanSlugFromUrl } from '@/lib/slug';
+import { UrlRedirect } from '@/components/UrlRedirect';
 
 const CategoryPage = () => {
   const { categorySlug } = useParams();
@@ -20,11 +22,14 @@ const CategoryPage = () => {
   const fetchCategoryPosts = async () => {
     setLoading(true);
     try {
+      // URL'den gelen kategori slug'ını temizle
+      const cleanCategorySlug = cleanSlugFromUrl(categorySlug || '');
+      
       // Önce kategori adını bul
       const { data: catData, error: catError } = await supabase
         .from("categories")
         .select("id, name, slug")
-        .or(`slug.eq.${categorySlug},name.ilike.%${categorySlug}%`)
+        .or(`slug.eq.${cleanCategorySlug},name.ilike.%${cleanCategorySlug}%`)
         .maybeSingle();
       
       if (catError) {
@@ -77,6 +82,7 @@ const CategoryPage = () => {
 
   return (
     <>
+      <UrlRedirect />
       <Seo title={`${categoryTitle || categorySlug} – Kategori`} description={`${categoryTitle || categorySlug} kategorisindeki yazılar.`} />
       <main className="container py-8">
         <h1 className="text-2xl font-bold mb-6">{categoryTitle || categorySlug}</h1>

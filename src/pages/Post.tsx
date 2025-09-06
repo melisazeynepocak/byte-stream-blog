@@ -19,6 +19,8 @@ import type { Post as DbPost, Category } from "@/types";
 import { formatRelativeDateTR } from "@/lib/utils";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { cleanSlugFromUrl, compareSlugs } from '@/lib/slug';
+import { UrlRedirect } from '@/components/UrlRedirect';
 
 /** Ekranda kullanacağımız normalize tip (DB tiplerinden türetilmiş) */
 type ViewPost = {
@@ -157,6 +159,9 @@ const PostPage = () => {
     (async () => {
       if (!postSlug) return;
 
+      // URL'den gelen slug'ı temizle
+      const cleanPostSlug = cleanSlugFromUrl(postSlug);
+      
       // Yazıyı slug ile getir + kategori join
       const { data, error } = await supabase
         .from("posts")
@@ -166,7 +171,7 @@ const PostPage = () => {
           categories:categories!posts_category_id_fkey ( id, name, slug )
         `
         )
-        .eq("slug", postSlug)
+        .eq("slug", cleanPostSlug)
         .eq("status", "published")
         .single();
 
@@ -293,6 +298,7 @@ const PostPage = () => {
 
   return (
     <>
+      <UrlRedirect />
       <ReadingProgress />
       <Seo
         title={`${post.title} – TeknoBlog`}
