@@ -343,6 +343,9 @@ export default function AdminPostEditor() {
         description: `Yazı ${status === 'draft' ? 'taslak olarak kaydedildi' : 'güncellendi ve yayınlandı'}`,
       });
 
+      // Sitemap'i güncelle
+      await updateSitemap();
+
       navigate("/admin");
     } catch (error: any) {
       toast({
@@ -352,6 +355,20 @@ export default function AdminPostEditor() {
       });
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Sitemap'i güncelle
+  const updateSitemap = async () => {
+    try {
+      await fetch('/api/regenerate-sitemap', { 
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+    } catch (error) {
+      console.error('Sitemap update failed:', error);
     }
   };
 
