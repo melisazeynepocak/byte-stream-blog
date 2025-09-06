@@ -163,13 +163,15 @@ const PostPage = () => {
       const cleanPostSlug = cleanSlugFromUrl(postSlug);
       const cleanCategorySlug = cleanSlugFromUrl(categorySlug || '');
       
+      // Debug log'ları kaldırıldı
+      
       // Önce kategoriyi bul (esnek arama)
       let categoryId = null;
       if (cleanCategorySlug) {
         const { data: catData } = await supabase
           .from("categories")
           .select("id, slug, name")
-          .or(`slug.eq.${cleanCategorySlug},slug.ilike.%${cleanCategorySlug}%,name.ilike.%${cleanCategorySlug}%`)
+          .or(`slug.eq.${cleanCategorySlug},name.ilike.%${cleanCategorySlug}%`)
           .maybeSingle();
         
         if (catData) {
@@ -177,22 +179,34 @@ const PostPage = () => {
         }
       }
       
-      // Yazıyı slug ile getir + kategori join
-      let { data, error } = await supabase
-        .from("posts")
-        .select(
-          `
-          id, title, slug, content, excerpt, cover_image, created_at, views, tags,
-          categories:categories!posts_category_id_fkey ( id, name, slug )
-        `
-        )
-        .eq("slug", cleanPostSlug)
-        .eq("status", "published")
-        .single();
+      // Yazıyı getir
+      let data: any = null;
+      let error: any = null;
       
-      // Eğer kategori ile bulunamadıysa, sadece post slug'ı ile ara
-      if (error && cleanCategorySlug) {
-        const { data: retryData, error: retryError } = await supabase
+      // Eğer kategori ID'si varsa, o kategoriye ait postları ara
+      if (categoryId) {
+        const { data: categoryData, error: categoryError } = await supabase
+          .from("posts")
+          .select(
+            `
+            id, title, slug, content, excerpt, cover_image, created_at, views, tags,
+            categories:categories!posts_category_id_fkey ( id, name, slug )
+          `
+          )
+          .eq("slug", cleanPostSlug)
+          .eq("status", "published")
+          .eq("category_id", categoryId)
+          .single();
+          
+        if (categoryData) {
+          data = categoryData;
+          error = categoryError;
+        }
+      }
+      
+      // Eğer hala bulunamadıysa, sadece post slug ile ara
+      if (!data) {
+        const { data: postData, error: postError } = await supabase
           .from("posts")
           .select(
             `
@@ -204,11 +218,11 @@ const PostPage = () => {
           .eq("status", "published")
           .single();
           
-        if (retryData) {
-          data = retryData;
-          error = retryError;
-        }
+        data = postData;
+        error = postError;
       }
+      
+      // Debug log'ları kaldırıldı
 
       if (error || !data || ignore) {
         setPost(null);
