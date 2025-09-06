@@ -2,8 +2,16 @@ import { createClient } from '@supabase/supabase-js';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Timeout ayarla (25 saniye)
+  const timeout = setTimeout(() => {
+    if (!res.headersSent) {
+      res.status(408).json({ error: 'Request timeout' });
+    }
+  }, 25000);
+
   // Sadece GET isteklerini kabul et
   if (req.method !== 'GET') {
+    clearTimeout(timeout);
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
@@ -140,9 +148,13 @@ ${urls.map(url => `  <url>
   </url>`).join('\n')}
 </urlset>`;
 
+    // Timeout'u temizle
+    clearTimeout(timeout);
+    
     // XML response döndür
-    res.setHeader('Content-Type', 'application/xml');
-    res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=3600'); // 1 saat cache
+    res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=1800, s-maxage=1800'); // 30 dakika cache
+    res.setHeader('X-Robots-Tag', 'noindex'); // Sitemap'in kendisini indexleme
     res.status(200).send(xml);
 
   } catch (error) {
@@ -201,7 +213,8 @@ ${urls.map(url => `  <url>
   </url>
 </urlset>`;
 
-    res.setHeader('Content-Type', 'application/xml');
+    clearTimeout(timeout);
+    res.setHeader('Content-Type', 'application/xml; charset=utf-8');
     res.status(200).send(fallbackXml);
   }
 }

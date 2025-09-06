@@ -140,8 +140,8 @@ function renderFormattedContent(content: string, images: PostImage[] = []) {
       >
         {content}
       </ReactMarkdown>
-    </div>
-  );
+      </div>
+    );
 }
 
 const PostPage = () => {
@@ -207,16 +207,16 @@ const PostPage = () => {
       // Eğer hala bulunamadıysa, sadece post slug ile ara
       if (!data) {
         const { data: postData, error: postError } = await supabase
-          .from("posts")
-          .select(
-            `
-            id, title, slug, content, excerpt, cover_image, created_at, views, tags,
-            categories:categories!posts_category_id_fkey ( id, name, slug )
+        .from("posts")
+        .select(
           `
-          )
+          id, title, slug, content, excerpt, cover_image, created_at, views, tags,
+          categories:categories!posts_category_id_fkey ( id, name, slug )
+        `
+        )
           .eq("slug", cleanPostSlug)
-          .eq("status", "published")
-          .single();
+        .eq("status", "published")
+        .single();
           
         data = postData;
         error = postError;

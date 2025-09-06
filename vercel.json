@@ -1,7 +1,8 @@
 {
   "functions": {
     "api/sitemap.xml.ts": {
-      "maxDuration": 30
+      "maxDuration": 30,
+      "memory": 1024
     },
     "api/sitemap-simple.ts": {
       "maxDuration": 10
