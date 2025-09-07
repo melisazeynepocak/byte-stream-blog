@@ -271,6 +271,7 @@ const PostPage = () => {
         await supabase.from("posts").update({ views: normalized.views + 1 }).eq("id", d.id);
       } catch {}
 
+
       // Benzer yazılar: aynı kategori slug'ına sahip ilk 6 kayıt (kendisi hariç)
       const { data: rel } = await supabase
         .from("posts")
@@ -309,12 +310,12 @@ const PostPage = () => {
       const { data: mostRead } = await supabase
         .from("posts")
         .select(
-          `id, title, slug, cover_image, views, categories:categories!posts_category_id_fkey (slug, name)`
+          `id, title, slug, cover_image, categories:categories!posts_category_id_fkey (slug, name)`
         )
         .eq("status", "published")
         .eq("categories.slug", normalized.category.slug)
         .neq("id", d.id)
-        .order("views", { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(3);
       setCategoryMostRead(mostRead || []);
     })();
@@ -402,9 +403,6 @@ const PostPage = () => {
               </Link>
               <span className="block text-xs text-muted-foreground mt-1 mb-1">
                 {formatRelativeDateTR(post.createdAt)}
-              </span>
-              <span className="block text-xs text-muted-foreground mb-1">
-                {(post.views ?? 0).toLocaleString()} görüntülenme
               </span>
               <h1 className="text-3xl md:text-4xl font-extrabold mt-2">{post.title}</h1>
               {/* alt başlık zorunlu değil; istersen content'ten kısa bir özet kullan */}

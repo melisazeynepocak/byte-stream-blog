@@ -19,7 +19,7 @@ export const RehberlerSidebar = () => {
         const { data, error } = await supabase
           .from("posts")
           .select(`
-            id, title, slug, cover_image, views, published_at,
+            id, title, slug, cover_image, published_at, views,
             categories:categories!posts_category_id_fkey (slug)
           `)
           .eq("status", "published")
@@ -86,7 +86,6 @@ export const RehberlerSidebar = () => {
                   </Link>
                   <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
                     <Eye className="w-3 h-3" />
-                    <span>{(guide.views ?? 0).toLocaleString()} görüntüleme</span>
                   </div>
                 </div>
               </li>

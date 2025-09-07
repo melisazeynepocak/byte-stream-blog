@@ -49,15 +49,14 @@ export function PopularGuides() {
               slug,
               cover_image,
               excerpt,
-              views,
               categories!posts_category_id_fkey (
                 id,
                 name,
                 slug
-              )
+              ),
+              views
             `)
             .eq('status', 'published')
-            .not('views', 'is', null)
             .order('views', { ascending: false })
             .limit(6);
 
@@ -73,8 +72,8 @@ export function PopularGuides() {
             slug: post.slug,
             cover_image: post.cover_image,
             excerpt: post.excerpt,
-            views: post.views,
             categories: post.categories,
+            views: post.views,
           }));
 
           setPosts(formattedPosts);
@@ -103,7 +102,6 @@ export function PopularGuides() {
               slug,
               cover_image,
               excerpt,
-              views,
               categories!posts_category_id_fkey (
                 id,
                 name,
@@ -125,8 +123,8 @@ export function PopularGuides() {
             slug: post.slug,
             cover_image: post.cover_image,
             excerpt: post.excerpt,
-            views: post.views,
             categories: post.categories,
+            views: post.views,
           }));
 
           // Preserve order by position
@@ -172,13 +170,6 @@ export function PopularGuides() {
                     {post.categories.name}
                   </Badge>
                 </div>
-                {mode === 'automatic' && post.views && (
-                  <div className="absolute top-2 right-2">
-                    <Badge variant="outline" className="text-xs">
-                      {post.views} görüntüleme
-                    </Badge>
-                  </div>
-                )}
               </div>
               <CardContent className="p-4">
                 <h3 className="font-bold text-base mb-2 line-clamp-2">

@@ -18,13 +18,13 @@ interface GuidePost {
   subtitle: string | null;
   slug: string;
   cover_image: string | null;
-  views: number | null;
   categories: {
     id: string;
     name: string;
     slug: string;
   };
   published_at: string | null;
+  views: number | null;
 }
 
 interface SelectedGuide {
@@ -96,13 +96,13 @@ export default function AdminPopularGuides() {
           subtitle,
           slug,
           cover_image,
-          views,
           categories!posts_category_id_fkey (
             id,
             name,
             slug
           ),
-          published_at
+          published_at,
+          views
         `)
         .eq('status', 'published')
         .order('published_at', { ascending: false })
@@ -115,9 +115,9 @@ export default function AdminPopularGuides() {
           subtitle: post.subtitle,
           slug: post.slug,
           cover_image: post.cover_image,
-          views: post.views,
           categories: post.categories,
           published_at: post.published_at,
+          views: post.views,
         }));
         setPosts(allPosts);
       }
@@ -291,7 +291,6 @@ export default function AdminPopularGuides() {
                         <div className="font-medium truncate">{idx + 1}. {post.title}</div>
                         <div className="text-xs text-muted-foreground flex items-center gap-2 mt-1">
                           <Badge variant="secondary">{post.categories?.name}</Badge>
-                          {post.views && <span>{post.views} görüntüleme</span>}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -377,7 +376,6 @@ export default function AdminPopularGuides() {
                   <p className="mt-2">Mevcut en popüler yazılar:</p>
                   <div className="mt-3 space-y-2">
                     {posts
-                      .filter(p => p.views && p.views > 0)
                       .sort((a, b) => (b.views || 0) - (a.views || 0))
                       .slice(0, 6)
                       .map((post, idx) => (

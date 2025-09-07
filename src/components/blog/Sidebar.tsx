@@ -10,7 +10,7 @@ export const Sidebar = () => {
     const fetchMostRead = async () => {
       const { data, error } = await supabase
         .from("posts")
-        .select(`id, title, slug, cover_image, views, categories:categories!posts_category_id_fkey (slug)`)
+        .select(`id, title, subtitle, slug, cover_image, views, categories:categories!posts_category_id_fkey (slug)`)
         .eq("status", "published")
         .order("views", { ascending: false })
         .limit(5);
@@ -36,7 +36,11 @@ export const Sidebar = () => {
                 <Link to={`/${p.categories?.slug || 'genel'}/${p.slug}`} className="font-medium leading-snug hover:underline">
                   {p.title}
                 </Link>
-                <div className="text-xs text-muted-foreground">{(p.views ?? 0).toLocaleString()} görüntülenme</div>
+                {p.subtitle && (
+                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                    {p.subtitle}
+                  </p>
+                )}
               </div>
             </li>
           ))}

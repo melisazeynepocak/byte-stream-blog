@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { formatRelativeDateTR } from "@/lib/utils";
-import { Eye } from "lucide-react";
 
 export const PostCard = ({ post }: { post: any }) => {
   const categorySlug = post?.category?.slug || post?.category_slug || "genel";
@@ -19,10 +18,6 @@ export const PostCard = ({ post }: { post: any }) => {
           decoding="async"
           className="w-full h-44 object-cover rounded-t-lg"
         />
-        <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/60 text-white text-xs px-2 py-1 rounded shadow">
-          <Eye className="w-4 h-4 mr-1" />
-          {(post.views ?? 0).toLocaleString()}
-        </div>
       </Link>
       <div className="p-4">
         <Link to={`/kategori/${categorySlug}`} className="text-xs text-primary">

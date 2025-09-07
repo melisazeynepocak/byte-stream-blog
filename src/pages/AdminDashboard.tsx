@@ -24,11 +24,11 @@ interface Post {
   category_id: string;
   categories: Category;
   featured: boolean;
-  views: number;
   status: string;
   published_at: string;
   created_at: string;
   cover_image?: string;
+  views: number;
 }
 
 export default function AdminDashboard() {

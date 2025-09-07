@@ -30,7 +30,6 @@ type ViewPost = {
   createdAt: string;
   tags: string[]; // yoksa boş dizi
   category: { name: string; slug: string };
-  views: number;
   images: PostImage[];
   excerpt?: string | null;
 };
@@ -161,7 +160,7 @@ const PostPage = () => {
         .from("posts")
         .select(
           `
-          id, title, slug, content, excerpt, cover_image, created_at, views, tags,
+          id, title, slug, content, excerpt, cover_image, created_at, tags,
           categories:categories!posts_category_id_fkey ( id, name, slug )
         `
         )
@@ -203,7 +202,6 @@ const PostPage = () => {
         createdAt: (d as any).published_at ?? d.created_at,
         tags: Array.isArray(d.tags) ? d.tags : [],
         category: { name: categoryName || catSlug, slug: catSlug },
-        views: d.views ?? 0,
         images: imagesData || [],
         excerpt: d.excerpt ?? "",
       };
@@ -211,10 +209,6 @@ const PostPage = () => {
       setPost(normalized);
       setComments(getComments(String(d.id)));
 
-      // Görüntülenme sayısı +1 (hata olursa sessiz geç)
-      try {
-        await supabase.from("posts").update({ views: normalized.views + 1 }).eq("id", d.id);
-      } catch {}
 
       // Benzer yazılar: aynı kategori slug'ına sahip ilk 6 kayıt (kendisi hariç)
       const { data: rel } = await supabase
@@ -254,12 +248,12 @@ const PostPage = () => {
       const { data: mostRead } = await supabase
         .from("posts")
         .select(
-          `id, title, slug, cover_image, views, categories:categories!posts_category_id_fkey (slug, name)`
+          `id, title, slug, cover_image, categories:categories!posts_category_id_fkey (slug, name)`
         )
         .eq("status", "published")
         .eq("categories.slug", normalized.category.slug)
         .neq("id", d.id)
-        .order("views", { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(3);
       setCategoryMostRead(mostRead || []);
     })();
@@ -348,7 +342,6 @@ const PostPage = () => {
                 {formatRelativeDateTR(post.createdAt)}
               </span>
               <span className="block text-xs text-muted-foreground mb-1">
-                {(post.views ?? 0).toLocaleString()} görüntülenme
               </span>
               <h1 className="text-3xl md:text-4xl font-extrabold mt-2">{post.title}</h1>
               {/* alt başlık zorunlu değil; istersen content'ten kısa bir özet kullan */}
