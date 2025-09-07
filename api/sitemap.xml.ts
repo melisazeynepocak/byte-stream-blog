@@ -94,6 +94,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         slug, 
         created_at, 
         updated_at,
+        category_id,
         categories:categories!posts_category_id_fkey(slug)
       `)
       .eq('status', 'published')
@@ -103,7 +104,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.error('Posts error:', postsError);
     } else if (posts) {
       posts.forEach(post => {
-        const categorySlug = post.categories?.slug || 'genel';
+        // categories bir array olduğu için ilk elemanı alıyoruz
+        const categorySlug = (post.categories && post.categories.length > 0) 
+          ? post.categories[0].slug 
+          : 'genel';
         const lastmod = post.updated_at || post.created_at;
         
         urls.push({
