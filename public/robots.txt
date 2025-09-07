@@ -1,8 +1,10 @@
 User-agent: Googlebot
 Allow: /
+Allow: /api/sitemap.xml
 
 User-agent: Bingbot
 Allow: /
+Allow: /api/sitemap.xml
 
 User-agent: Twitterbot
 Allow: /
@@ -12,3 +14,8 @@ Allow: /
 
 User-agent: *
 Allow: /
+Allow: /api/sitemap.xml
+
+Sitemap: https://teknoblogoji.com.tr/sitemap.xml
+Sitemap: https://teknoblogoji.com.tr/sitemap-static.xml
+Sitemap: https://teknoblogoji.com.tr/api/sitemap.xml

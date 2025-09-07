@@ -15,9 +15,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // User-Agent log'u (Google bot'ları için)
+  const userAgent = req.headers['user-agent'] || 'unknown';
+  console.log('Sitemap request from:', userAgent);
+
   // Environment variable'ları kontrol et
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
     console.error('Missing Supabase environment variables');
+    clearTimeout(timeout);
     return res.status(500).json({ error: 'Server configuration error' });
   }
 
