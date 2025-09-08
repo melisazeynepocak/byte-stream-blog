@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Seo } from "@/components/Seo";
 import AdSlot from "@/components/AdSlot";
-import { addComment, getComments } from "@/lib/blogData";
+// Yorumlar Supabase üzerinde tutulur; sadece onaylı olanlar gösterilir
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -152,6 +153,8 @@ const PostPage = () => {
   const [message, setMessage] = useState("");
   const [comments, setComments] = useState<any[]>([]);
   const [categoryMostRead, setCategoryMostRead] = useState<any[]>([]);
+  const [submittingComment, setSubmittingComment] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     let ignore = false;
@@ -264,7 +267,24 @@ const PostPage = () => {
       };
 
       setPost(normalized);
-      setComments(getComments(String(d.id)));
+      // Yalnızca onaylanmış yorumları getir
+      try {
+        const sb: any = supabase as any;
+        const { data: approvedComments } = await sb
+          .from("comments")
+          .select("id, name, message, created_at")
+          .eq("post_id", d.id)
+          .eq("approved", true)
+          .order("created_at", { ascending: false });
+        setComments(
+          (approvedComments || []).map((c: any) => ({
+            id: c.id,
+            name: c.name,
+            message: c.message,
+            createdAt: c.created_at,
+          }))
+        );
+      } catch {}
 
       // Görüntülenme sayısı +1 (hata olursa sessiz geç)
       try {
@@ -474,20 +494,56 @@ const PostPage = () => {
             <section id="comments" className="mt-12 border-t pt-8">
               <h3 className="font-semibold text-lg mb-3">Yorumlar</h3>
               <form
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
-                  if (!name.trim() || !message.trim()) return;
-                  addComment(String(post.id), name.trim(), message.trim());
-                  setComments(getComments(String(post.id)));
-                  setName("");
-                  setMessage("");
+                  if (!name.trim() || !message.trim() || submittingComment) return;
+                  
+                  setSubmittingComment(true);
+                  try {
+                    const sb: any = supabase as any;
+                    const { error } = await sb.from("comments").insert({
+                      post_id: post.id,
+                      name: name.trim(),
+                      message: message.trim(),
+                      approved: false,
+                    });
+                    if (error) throw error;
+                    toast({
+                      title: "Yorum alındı",
+                      description: "Yorumunuz admin onayından sonra görüntülenecektir.",
+                    });
+                    setName("");
+                    setMessage("");
+                  } catch (err: any) {
+                    toast({
+                      title: "Hata",
+                      description: "Yorum eklenemedi: " + (err?.message || "bilinmeyen hata"),
+                      variant: "destructive",
+                    });
+                  } finally {
+                    setSubmittingComment(false);
+                  }
                 }}
                 className="space-y-3"
               >
-                <Input placeholder="Adınız" value={name} onChange={(e) => setName(e.target.value)} />
-                <Textarea placeholder="Yorumunuz" value={message} onChange={(e) => setMessage(e.target.value)} />
-                <button type="submit" className="px-4 py-2 rounded bg-primary text-primary-foreground">
-                  Gönder
+                <Input 
+                  placeholder="Adınız" 
+                  value={name} 
+                  onChange={(e) => setName(e.target.value)}
+                  disabled={submittingComment}
+                />
+                <Textarea 
+                  placeholder="Yorumunuz" 
+                  value={message} 
+                  onChange={(e) => setMessage(e.target.value)}
+                  disabled={submittingComment}
+                />
+                <button 
+                  type="submit" 
+                  disabled={submittingComment || !name.trim() || !message.trim()}
+                  className="px-4 py-2 rounded bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {submittingComment ? "Gönderiliyor..." : "Gönder"}
                 </button>
               </form>
 

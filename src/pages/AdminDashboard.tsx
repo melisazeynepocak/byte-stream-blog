@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Seo } from "@/components/Seo";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Eye, LogOut, BookOpen } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, LogOut } from "lucide-react";
 
 interface Category {
   id: string;
@@ -36,12 +36,13 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [posts, setPosts] = useState<Post[]>([]);
-  const [rehberler, setRehberler] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [page, setPage] = useState<number>(1);
+  const PAGE_SIZE = 10;
 
   useEffect(() => {
     fetchPosts();
-    fetchRehberler();
   }, []);
 
   const fetchPosts = async () => {
@@ -72,33 +73,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const fetchRehberler = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('posts')
-        .select(`
-          *,
-          categories (
-            id,
-            name,
-            slug
-          )
-        `)
-        .or("tags.cs.{rehber},tags.cs.{guide}")
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (error) throw error;
-      
-      setRehberler(data || []);
-    } catch (error: any) {
-      toast({
-        title: "Hata",
-        description: "Rehberler yüklenirken hata oluştu: " + error.message,
-        variant: "destructive",
-      });
-    }
-  };
+  
 
   const handleDeletePost = async (id: string) => {
     if (!confirm("Bu yazıyı silmek istediğinizden emin misiniz?")) return;
@@ -149,6 +124,9 @@ export default function AdminDashboard() {
             <p className="text-muted-foreground">Blog yazılarınızı yönetin</p>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate("/admin/comments")}>
+              Yorumlar
+            </Button>
             <Button variant="outline" onClick={() => navigate("/admin/headlines")}>
               Manşetler
             </Button>
@@ -177,94 +155,43 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid gap-6">
-          {/* Rehberler Bölümü */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <BookOpen className="w-5 h-5" />
-                Son Rehberler
-              </h2>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate("/rehberler")}
-              >
-                Tümünü Gör
-              </Button>
-            </div>
-            
-            {rehberler.length === 0 ? (
-              <Card>
-                <CardContent className="pt-6 text-center">
-                  <p className="text-muted-foreground">Henüz rehber yok. İlk rehberinizi oluşturun!</p>
-                  <Button onClick={() => navigate("/admin/rehber/new")} className="mt-4">
-                    Yeni Rehber Oluştur
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4">
-                {rehberler.map((rehber) => (
-                  <Card key={rehber.id}>
-                    <CardHeader>
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <CardTitle className="flex items-center gap-2 text-lg">
-                            {rehber.title}
-                            {rehber.featured && <Badge variant="secondary">Öne Çıkan</Badge>}
-                            {rehber.status === 'draft' && <Badge variant="outline">Taslak</Badge>}
-                          </CardTitle>
-                          <CardDescription>{rehber.subtitle}</CardDescription>
-                          <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                            <span>Kategori: {rehber.categories.name}</span>
-                            <span className="flex items-center gap-1">
-                              <Eye className="w-4 h-4" />
-                              {rehber.views || 0} görüntüleme
-                            </span>
-                            <span>{new Date(rehber.created_at).toLocaleDateString('tr-TR')}</span>
-                          </div>
-                        </div>
-                        {rehber.cover_image && (
-                          <img 
-                            src={rehber.cover_image} 
-                            alt={rehber.title}
-                            className="w-16 h-16 object-cover rounded-md ml-4"
-                          />
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => navigate(`/admin/rehber/edit/${rehber.id}`)}
-                          className="flex items-center gap-1"
-                        >
-                          <Edit className="w-4 h-4" />
-                          Düzenle
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => navigate(`/${rehber.categories.slug}/${rehber.slug}`)}
-                          className="flex items-center gap-1"
-                        >
-                          <Eye className="w-4 h-4" />
-                          Görüntüle
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
-
           {/* Yazılar Bölümü */}
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Son Yazılar</h2>
-            {posts.length === 0 ? (
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <h2 className="text-xl font-semibold">Son Yazılar</h2>
+              <div className="flex items-center gap-2">
+                {[
+                  { key: "all", label: "Tümü" },
+                  { key: "rehberler", label: "Rehber" },
+                  { key: "telefon", label: "Telefon" },
+                  { key: "Bilgisayar", label: "Bilgisayar" },
+                  { key: "yapay-zeka", label: "Yapay Zeka" },
+                  { key: "yazilim", label: "Yazılım" },
+                ].map((c) => (
+                  <Button
+                    key={c.key}
+                    variant={selectedCategory === c.key ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => {
+                      setSelectedCategory(c.key);
+                      setPage(1);
+                    }}
+                  >
+                    {c.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            {(() => {
+              const filtered = posts.filter((post) => {
+                if (selectedCategory === "all") return true;
+                const slug = (post.categories?.slug || "").toLowerCase();
+                const key = selectedCategory.toLowerCase();
+                return slug === key;
+              });
+
+              if (filtered.length === 0) {
+                return (
               <Card>
                 <CardContent className="pt-6 text-center">
                   <p className="text-muted-foreground">Henüz yazı yok. İlk yazınızı oluşturun!</p>
@@ -273,8 +200,17 @@ export default function AdminDashboard() {
                   </Button>
                 </CardContent>
               </Card>
-            ) : (
-              posts.map((post) => (
+                );
+              }
+
+              const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+              const safePage = Math.min(page, totalPages);
+              const start = (safePage - 1) * PAGE_SIZE;
+              const current = filtered.slice(start, start + PAGE_SIZE);
+
+              return (
+                <>
+                  {current.map((post) => (
                 <Card key={post.id}>
                   <CardHeader>
                     <div className="flex justify-between items-start">
@@ -339,8 +275,34 @@ export default function AdminDashboard() {
                     </div>
                   </CardContent>
                 </Card>
-              ))
-            )}
+                  ))}
+
+                  <div className="flex items-center justify-between pt-2">
+                    <div className="text-sm text-muted-foreground">
+                      Sayfa {safePage} / {totalPages} — Toplam {filtered.length} içerik
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                        disabled={safePage === 1}
+                      >
+                        Önceki
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                        disabled={safePage === totalPages}
+                      >
+                        Sonraki
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </div>
       </main>
