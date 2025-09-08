@@ -115,8 +115,12 @@ export default function Header() {
         <Link to="/" className="group">
           <div className="flex items-center gap-2">
             <div className="relative">
-              <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-fuchsia-600 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
-                <span className="text-white font-bold text-sm">T</span>
+              <div className="w-8 h-8 rounded-lg shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 overflow-hidden">
+                <img 
+                  src="/logo.png" 
+                  alt="TeknoBlogoji Logo" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full animate-pulse"></div>
             </div>

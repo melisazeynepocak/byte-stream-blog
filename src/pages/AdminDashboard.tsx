@@ -7,7 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Seo } from "@/components/Seo";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Eye, LogOut } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, Edit, Trash2, Eye, LogOut, ArrowUpDown } from "lucide-react";
 
 interface Category {
   id: string;
@@ -38,6 +39,7 @@ export default function AdminDashboard() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("date-desc");
   const [page, setPage] = useState<number>(1);
   const PAGE_SIZE = 10;
 
@@ -143,10 +145,6 @@ export default function AdminDashboard() {
               <Plus className="w-4 h-4" />
               Yeni Yazı
             </Button>
-            <Button onClick={() => navigate("/admin/rehber/new")} variant="secondary" className="flex items-center gap-2">
-              <Plus className="w-4 h-4" />
-              Yeni Rehber
-            </Button>
             <Button variant="outline" onClick={handleSignOut} className="flex items-center gap-2">
               <LogOut className="w-4 h-4" />
               Çıkış
@@ -159,27 +157,48 @@ export default function AdminDashboard() {
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <h2 className="text-xl font-semibold">Son Yazılar</h2>
-              <div className="flex items-center gap-2">
-                {[
-                  { key: "all", label: "Tümü" },
-                  { key: "rehberler", label: "Rehber" },
-                  { key: "telefon", label: "Telefon" },
-                  { key: "Bilgisayar", label: "Bilgisayar" },
-                  { key: "yapay-zeka", label: "Yapay Zeka" },
-                  { key: "yazilim", label: "Yazılım" },
-                ].map((c) => (
-                  <Button
-                    key={c.key}
-                    variant={selectedCategory === c.key ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => {
-                      setSelectedCategory(c.key);
-                      setPage(1);
-                    }}
-                  >
-                    {c.label}
-                  </Button>
-                ))}
+              <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex items-center gap-2">
+                  {[
+                    { key: "all", label: "Tümü" },
+                    { key: "rehberler", label: "Rehber" },
+                    { key: "telefon", label: "Telefon" },
+                    { key: "Bilgisayar", label: "Bilgisayar" },
+                    { key: "yapay-zeka", label: "Yapay Zeka" },
+                    { key: "yazilim", label: "Yazılım" },
+                  ].map((c) => (
+                    <Button
+                      key={c.key}
+                      variant={selectedCategory === c.key ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => {
+                        setSelectedCategory(c.key);
+                        setPage(1);
+                      }}
+                    >
+                      {c.label}
+                    </Button>
+                  ))}
+                </div>
+                <div className="flex items-center gap-2">
+                  <ArrowUpDown className="w-4 h-4 text-muted-foreground" />
+                  <Select value={sortBy} onValueChange={(value) => {
+                    setSortBy(value);
+                    setPage(1);
+                  }}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Sırala" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="date-desc">Tarihe göre (Yeni → Eski)</SelectItem>
+                      <SelectItem value="date-asc">Tarihe göre (Eski → Yeni)</SelectItem>
+                      <SelectItem value="views-desc">En çok görüntülenen</SelectItem>
+                      <SelectItem value="views-asc">En az görüntülenen</SelectItem>
+                      <SelectItem value="title-asc">Başlığa göre (A → Z)</SelectItem>
+                      <SelectItem value="title-desc">Başlığa göre (Z → A)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
             {(() => {
@@ -190,7 +209,27 @@ export default function AdminDashboard() {
                 return slug === key;
               });
 
-              if (filtered.length === 0) {
+              // Sıralama uygula
+              const sorted = [...filtered].sort((a, b) => {
+                switch (sortBy) {
+                  case "date-desc":
+                    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                  case "date-asc":
+                    return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+                  case "views-desc":
+                    return (b.views || 0) - (a.views || 0);
+                  case "views-asc":
+                    return (a.views || 0) - (b.views || 0);
+                  case "title-asc":
+                    return a.title.localeCompare(b.title, 'tr');
+                  case "title-desc":
+                    return b.title.localeCompare(a.title, 'tr');
+                  default:
+                    return 0;
+                }
+              });
+
+              if (sorted.length === 0) {
                 return (
               <Card>
                 <CardContent className="pt-6 text-center">
@@ -203,10 +242,10 @@ export default function AdminDashboard() {
                 );
               }
 
-              const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+              const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
               const safePage = Math.min(page, totalPages);
               const start = (safePage - 1) * PAGE_SIZE;
-              const current = filtered.slice(start, start + PAGE_SIZE);
+              const current = sorted.slice(start, start + PAGE_SIZE);
 
               return (
                 <>
@@ -279,7 +318,7 @@ export default function AdminDashboard() {
 
                   <div className="flex items-center justify-between pt-2">
                     <div className="text-sm text-muted-foreground">
-                      Sayfa {safePage} / {totalPages} — Toplam {filtered.length} içerik
+                      Sayfa {safePage} / {totalPages} — Toplam {sorted.length} içerik
                     </div>
                     <div className="flex items-center gap-2">
                       <Button
